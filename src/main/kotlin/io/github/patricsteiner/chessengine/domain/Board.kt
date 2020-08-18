@@ -27,7 +27,9 @@ class Board {
         }
     }
 
-    private val pieces = mutableListOf<Piece>() // TODO could use hashmap or sth instead
+    private var turn = WHITE
+
+    private val pieces = mutableSetOf<Piece>() // TODO could use hashmap or sth instead
 
     fun setup() {
         for (i in 0 until N_RANKS) {
@@ -50,6 +52,7 @@ class Board {
         pieces.add(Queen(BLACK, Position('d', 8)))
         pieces.add(King(WHITE, Position('e', 1)))
         pieces.add(King(BLACK, Position('e', 8)))
+//        pieces.add(Queen(WHITE, Position('e', 6))) // just for testing
     }
 
     private operator fun get(position: Position): Piece? {
@@ -58,37 +61,31 @@ class Board {
 
     fun move(from: Position, to: Position): MoveRecord {
         val piece = getOrThrow(from)
-        if (this[to] != null) {
-            throw IllegalArgumentException("$piece on $from cannot move to $to because position is occupied")
+        if (turn != piece.color) {
+            throw IllegalArgumentException("It's not ${piece.color}'s turn")
         }
-        if (!piece.canMove(to)) {
-            throw IllegalArgumentException("$piece on $from cannot move to $to")
+        val victim = this[to]
+        val isCapturingMove = victim != null
+        if (isCapturingMove) {
+            if (piece.color == victim?.color) {
+                throw IllegalArgumentException("$piece on $from cannot friendly-fire $victim on $to")
+            }
+            if (!piece.canCapture(to)) {
+                throw IllegalArgumentException("$piece on $from cannot capture $victim on $to")
+            }
+        } else if (!isCapturingMove && !piece.canMove(to)) {
+            throw IllegalArgumentException("$piece on $from cannot move to $to because position is occupied by $victim")
         }
         if (!piece.canJumpOverPieces() && hasPieceOnLineBetween(from, to)) {
-            throw IllegalArgumentException("$piece on $from cannot move to $to because there are other pieces between")
+            throw IllegalArgumentException("$piece on $from cannot move to $to because there are other pieces in between")
         }
-        return createAndApplyMoveRecord(piece, from, to, null)
-    }
-
-    fun capture(from: Position, to: Position): MoveRecord {
-        val attacker = getOrThrow(from)
-        val victim = getOrThrow(to)
-        if (!attacker.canCapture(to)) {
-            throw IllegalArgumentException("$attacker on $from cannot capture $victim on $to")
-        }
-        if (!attacker.canJumpOverPieces() && hasPieceOnLineBetween(from, to)) {
-            throw IllegalArgumentException("$attacker on $from cannot move to $to because there are other pieces between")
-        }
-        return createAndApplyMoveRecord(attacker, from, to, victim)
-    }
-
-    private fun createAndApplyMoveRecord(piece: Piece, from: Position, to: Position, victim: Piece?): MoveRecord {
-        val moveRecord = MoveRecord(piece,to, victim)
+        val moveRecord = MoveRecord(piece, to, victim)
         apply(moveRecord)
         if (isCheck(moveRecord.piece.color)) {
             undo(moveRecord)
             throw IllegalArgumentException("$piece on $from cannot move to $to (cannot put it's king into check)")
         }
+        turn = if (turn == WHITE) BLACK else WHITE
         return moveRecord
     }
 
@@ -97,13 +94,19 @@ class Board {
     }
 
     fun apply(moveRecord: MoveRecord) {
-        moveRecord.victim?.let { pieces.removeIf { it.position == moveRecord.to } }
-        getOrThrow(moveRecord.piece.position).position = moveRecord.to
+        if (moveRecord.victim != null) {
+            pieces.removeIf { it.position == moveRecord.victim.position }
+        }
+        val piece = getOrThrow(moveRecord.piece.position)
+        piece.position = moveRecord.to
     }
 
     fun undo(moveRecord: MoveRecord) {
-        getOrThrow(moveRecord.piece.position).position = moveRecord.piece.position
-        moveRecord.victim?.let { pieces.add(it) }
+        val piece = getOrThrow(moveRecord.to)
+        piece.position = moveRecord.piece.position
+        if (moveRecord.victim != null) {
+            pieces.add(moveRecord.victim)
+        }
     }
 
     /**
@@ -147,7 +150,6 @@ class Board {
         forEachPosition {
             val piece = this[it]
             if (piece != null && piece.color != color && piece.canCapture(kingPos)) {
-                println("DEBUG: $piece at $it checks $color king at $kingPos")
                 check = true
             }
         }

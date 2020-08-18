@@ -17,15 +17,10 @@ class ChessengineApplication : CommandLineRunner {
         print()
         var input: String? = readLine()
         while (input != null) {
-            val from = Position(input[1], input.substring(2, 3).toInt())
-            val to = Position(input[3], input.substring(4, 5).toInt())
-            if (input[0] == 'm') try {
+            val from = Position(input[0], input[1].toString().toInt())
+            val to = Position(input[2], input[3].toString().toInt())
+            try {
                 board.move(from, to)
-            } catch (e: Exception) {
-                println(e.message)
-            }
-            else try {
-                board.capture(from, to)
             } catch (e: Exception) {
                 println(e.message)
             }

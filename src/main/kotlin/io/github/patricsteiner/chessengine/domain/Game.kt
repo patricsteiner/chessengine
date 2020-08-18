@@ -17,7 +17,8 @@ class Game {
 
     fun move(player: Player, from: Position, to: Position) {
         if (turn != player.color) return
-        moves.add(board.move(from, to))
+        val moveRecord = board.move(from, to)
+        moves.add(moveRecord)
     }
 
     fun isOver(): Boolean {
