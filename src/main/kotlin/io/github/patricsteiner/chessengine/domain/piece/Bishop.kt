@@ -4,7 +4,7 @@ import io.github.patricsteiner.chessengine.domain.Board
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 
-class Bishop(color: Color) : Piece(color) {
+class Bishop(color: Color, position: Position) : Piece(color, position) {
 
     override fun toChar(): Char {
         return if (color == WHITE) 'B' else 'b'
@@ -14,8 +14,8 @@ class Bishop(color: Color) : Piece(color) {
         return if (color == WHITE) "\u2657" else "\u265D"
     }
 
-    override fun canMove(board: Board, from: Position, to: Position, deltaX: Int, deltaY: Int): Boolean {
-        return Board.isOnSameDiagonal(from, to) && !board.hasPieceOnLineBetween(from, to)
+    override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
+        return Board.isOnSameDiagonal(position, to)
     }
 
 }

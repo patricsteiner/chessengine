@@ -1,8 +1,8 @@
 package io.github.patricsteiner.chessengine
 
-import io.github.patricsteiner.chessengine.domain.Board2
+import io.github.patricsteiner.chessengine.domain.Board
 import io.github.patricsteiner.chessengine.domain.Position
-import io.github.patricsteiner.chessengine.domain.piece.Piece2
+import io.github.patricsteiner.chessengine.domain.piece.Piece
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -10,7 +10,7 @@ import org.springframework.boot.runApplication
 @SpringBootApplication
 class ChessengineApplication : CommandLineRunner {
 
-    val board = Board2()
+    val board = Board()
 
     override fun run(vararg args: String?) {
         board.setup()
@@ -29,8 +29,8 @@ class ChessengineApplication : CommandLineRunner {
             } catch (e: Exception) {
                 println(e.message)
             }
-            if (board.isCheck(Piece2.Color.WHITE)) println("WHITE IS CHECK")
-            if (board.isCheck(Piece2.Color.BLACK)) println("BLACK IS CHECK")
+            if (board.isCheck(Piece.Color.WHITE)) println("WHITE IS CHECK")
+            if (board.isCheck(Piece.Color.BLACK)) println("BLACK IS CHECK")
             print()
             input = readLine()
         }
@@ -41,7 +41,6 @@ class ChessengineApplication : CommandLineRunner {
         println(board)
         println("==============================")
     }
-
 
 }
 

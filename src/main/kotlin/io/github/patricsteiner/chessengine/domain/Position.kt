@@ -15,7 +15,7 @@ class Position(val file: Char, val rank: Int) {
         y = N_RANKS - rank
     }
 
-    constructor(x: Int, y: Int): this('a' + x, N_RANKS - y)
+    constructor(x: Int, y: Int) : this('a' + x, N_RANKS - y)
 
     override fun toString(): String {
         return "$file$rank"

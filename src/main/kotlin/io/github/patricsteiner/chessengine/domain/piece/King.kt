@@ -1,10 +1,9 @@
 package io.github.patricsteiner.chessengine.domain.piece
 
-import io.github.patricsteiner.chessengine.domain.Board
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 
-class King(color: Color) : Piece(color) {
+class King(color: Color, position: Position) : Piece(color, position) {
 
     override fun toChar(): Char {
         return if (color == WHITE) 'K' else 'k'
@@ -14,7 +13,7 @@ class King(color: Color) : Piece(color) {
         return if (color == WHITE) "\u2654" else "\u265A"
     }
 
-    override fun canMove(board: Board, from: Position, to: Position, deltaX: Int, deltaY: Int): Boolean {
+    override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
         if (deltaX > 1 || deltaY > 1) return false
         return deltaX + deltaY <= 2
     }
