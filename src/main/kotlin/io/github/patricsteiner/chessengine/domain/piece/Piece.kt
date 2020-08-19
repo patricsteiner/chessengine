@@ -13,6 +13,19 @@ abstract class Piece(val color: Color, var position: Position) {
     enum class Color { BLACK, WHITE }
 
     companion object {
+//
+//        val pieceToChar = mapOf(
+//                Pawn::class to 'p',
+//                Rook::class to 'r',
+//                Knight::class to 'n',
+//                Bishop::class to 'b',
+//                Queen::class to 'q',
+//                King::class to 'k'
+//        )
+//        val charToPiece = pieceToChar.entries.associateBy({ it.value }) { it.key }
+//        return pieceClass.java.getConstructor(Color::class.java, Position::class.java).newInstance(color, position)
+
+
         fun fromSerialized(serialized: String): Piece {
             val pieceChar = serialized[0]
             val file = serialized[1]
@@ -42,7 +55,7 @@ abstract class Piece(val color: Color, var position: Position) {
 
     abstract fun toChar(): Char
 
-    protected abstract fun toUnicodeSymbol(): String
+    abstract fun toUnicodeSymbol(): String
 
     fun canMove(to: Position): Boolean {
         val deltaX = abs(position.x - to.x)

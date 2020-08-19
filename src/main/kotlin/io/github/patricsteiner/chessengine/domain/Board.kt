@@ -27,9 +27,10 @@ class Board {
         }
     }
 
-    private var turn = WHITE
+    var turn = WHITE
+        private set
 
-    private val pieces = mutableSetOf<Piece>() // TODO could use hashmap or sth instead
+    private val pieces = mutableListOf<Piece>() // TODO could use hashmap or sth instead
 
     fun setup() {
         for (i in 0 until N_RANKS) {
@@ -52,7 +53,7 @@ class Board {
         pieces.add(Queen(BLACK, Position('d', 8)))
         pieces.add(King(WHITE, Position('e', 1)))
         pieces.add(King(BLACK, Position('e', 8)))
-//        pieces.add(Queen(WHITE, Position('e', 6))) // just for testing
+        pieces.add(Queen(WHITE, Position('e', 6))) // just for testing
     }
 
     private operator fun get(position: Position): Piece? {
@@ -185,6 +186,10 @@ class Board {
             }
         }
         return sb.toString()
+    }
+
+    fun pieces(): List<Piece> {
+        return pieces.toList()
     }
 
 }
