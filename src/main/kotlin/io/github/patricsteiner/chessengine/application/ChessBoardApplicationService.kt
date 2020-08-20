@@ -3,7 +3,7 @@ package io.github.patricsteiner.chessengine.application
 import io.github.patricsteiner.chessengine.domain.BoardRepository
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece
-import io.github.patricsteiner.chessengine.infra.BoardData
+import io.github.patricsteiner.chessengine.domain.BoardData
 
 class ChessBoardApplicationService(private val boardRepository: BoardRepository) {
 

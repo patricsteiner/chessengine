@@ -1,7 +1,5 @@
-package io.github.patricsteiner.chessengine.infra
+package io.github.patricsteiner.chessengine.domain
 
-import io.github.patricsteiner.chessengine.domain.Board
-import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece
 
 data class BoardData(
@@ -16,6 +14,7 @@ data class BoardData(
 }
 
 data class PieceData(
+        val type: Class<out Piece>,
         val char: Char,
         val color: Piece.Color,
         val unicodeSymbol: String,
@@ -23,7 +22,7 @@ data class PieceData(
 ) {
     companion object {
         fun from(piece: Piece): PieceData {
-            return PieceData(piece.toChar(), piece.color, piece.toUnicodeSymbol(), piece.position)
+            return PieceData(piece::class.java, piece.toChar(), piece.color, piece.toUnicodeSymbol(), piece.position)
         }
     }
 }

@@ -27,8 +27,7 @@ class Board {
         }
     }
 
-    var turn = WHITE
-        private set
+    var turn = WHITE; private set
 
     private val pieces = mutableListOf<Piece>() // TODO could use hashmap or sth instead
 
@@ -150,8 +149,10 @@ class Board {
         val kingPos = findKing(color) ?: throw IllegalStateException("There is no king")
         forEachPosition {
             val piece = this[it]
-            if (piece != null && piece.color != color && piece.canCapture(kingPos)) {
+            if (piece != null && piece.color != color && piece.canCapture(kingPos) &&
+                    (piece.canJumpOverPieces() || !hasPieceOnLineBetween(piece.position, kingPos))) {
                 check = true
+                println("DEBUG: King on $kingPos is check by $piece on ${piece.position}")
             }
         }
         return check

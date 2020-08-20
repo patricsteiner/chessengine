@@ -1,8 +1,7 @@
 package io.github.patricsteiner.chessengine.domain.piece
 
 import io.github.patricsteiner.chessengine.domain.Position
-import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.BLACK
-import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
+import io.github.patricsteiner.chessengine.domain.PieceData
 import kotlin.math.abs
 
 /**
@@ -13,39 +12,8 @@ abstract class Piece(val color: Color, var position: Position) {
     enum class Color { BLACK, WHITE }
 
     companion object {
-//
-//        val pieceToChar = mapOf(
-//                Pawn::class to 'p',
-//                Rook::class to 'r',
-//                Knight::class to 'n',
-//                Bishop::class to 'b',
-//                Queen::class to 'q',
-//                King::class to 'k'
-//        )
-//        val charToPiece = pieceToChar.entries.associateBy({ it.value }) { it.key }
-//        return pieceClass.java.getConstructor(Color::class.java, Position::class.java).newInstance(color, position)
-
-
-        fun fromSerialized(serialized: String): Piece {
-            val pieceChar = serialized[0]
-            val file = serialized[1]
-            val rank = serialized[2].toString().toInt()
-            val position = Position(file, rank)
-            return when (pieceChar) {
-                'p' -> Pawn(BLACK, position)
-                'P' -> Pawn(WHITE, position)
-                'r' -> Rook(BLACK, position)
-                'R' -> Rook(WHITE, position)
-                'n' -> Knight(BLACK, position)
-                'N' -> Knight(WHITE, position)
-                'b' -> Bishop(BLACK, position)
-                'B' -> Bishop(WHITE, position)
-                'q' -> Queen(BLACK, position)
-                'Q' -> Queen(WHITE, position)
-                'k' -> King(BLACK, position)
-                'K' -> King(WHITE, position)
-                else -> throw IllegalArgumentException("Cannot deserialize $serialized")
-            }
+        fun of(type: Class<out Piece>, color: Color, position: Position): Piece {
+            return type.getConstructor(Color::class.java, Position::class.java).newInstance(color, position)
         }
     }
 
@@ -79,13 +47,15 @@ abstract class Piece(val color: Color, var position: Position) {
     open fun canJumpOverPieces(): Boolean {
         return false
     }
-
-    fun serialize(): String {
-        return toChar().toString() + this.position
-    }
+//
+//    fun serialize(): String {
+//        return toChar().toString() + this.position
+//    }
 
     fun copy(): Piece {
-        return fromSerialized(serialize())
+        val pieceData = PieceData.from(this)
+        return of(pieceData.type, pieceData.color, pieceData.position)
+//        return fromSerialized(serialize())
     }
 
 }
