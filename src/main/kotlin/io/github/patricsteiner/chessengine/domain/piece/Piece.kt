@@ -26,8 +26,8 @@ abstract class Piece(val color: Color, var position: Position) {
     abstract fun toUnicodeSymbol(): String
 
     fun canMove(to: Position): Boolean {
-        val deltaX = abs(position.x - to.x)
-        val deltaY = abs(position.y - to.y)
+        val deltaX = position.x - to.x
+        val deltaY = position.y - to.y
         if (deltaX == 0 && deltaY == 0) return false // cannot stay on same position
         return canMove(to, deltaX, deltaY)
     }
@@ -35,8 +35,8 @@ abstract class Piece(val color: Color, var position: Position) {
     protected abstract fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean
 
     fun canCapture(position: Position): Boolean {
-        val deltaX = abs(this.position.x - position.x)
-        val deltaY = abs(this.position.y - position.y)
+        val deltaX = this.position.x - position.x
+        val deltaY = this.position.y - position.y
         return canCapture(position, deltaX, deltaY)
     }
 
@@ -47,15 +47,10 @@ abstract class Piece(val color: Color, var position: Position) {
     open fun canJumpOverPieces(): Boolean {
         return false
     }
-//
-//    fun serialize(): String {
-//        return toChar().toString() + this.position
-//    }
 
     fun copy(): Piece {
         val pieceData = PieceData.from(this)
         return of(pieceData.type, pieceData.color, pieceData.position)
-//        return fromSerialized(serialize())
     }
 
 }

@@ -27,9 +27,9 @@ class Board {
         }
     }
 
-    var turn = WHITE; private set
-
     private val pieces = mutableListOf<Piece>() // TODO could use hashmap or sth instead
+
+    var turn = WHITE
 
     fun setup() {
         for (i in 0 until N_RANKS) {
@@ -52,19 +52,14 @@ class Board {
         pieces.add(Queen(BLACK, Position('d', 8)))
         pieces.add(King(WHITE, Position('e', 1)))
         pieces.add(King(BLACK, Position('e', 8)))
-//        pieces.add(Queen(WHITE, Position('e', 6))) // just for testing
     }
 
-    private operator fun get(position: Position): Piece? {
+    operator fun get(position: Position): Piece? {
         return pieces.find { it.position == position }
     }
 
     fun move(from: Position, to: Position): MoveRecord {
         val piece = getOrThrow(from)
-        // TODO buggy somehow
-//        if (turn != piece.color) {
-//            throw IllegalArgumentException("It's not ${piece.color}'s turn")
-//        }
         val victim = this[to]
         val isCapturingMove = victim != null
         if (isCapturingMove) {
@@ -86,7 +81,6 @@ class Board {
             undo(moveRecord)
             throw IllegalArgumentException("$piece on $from cannot move to $to (cannot put it's king into check)")
         }
-        turn = if (turn == WHITE) BLACK else WHITE
         return moveRecord
     }
 
@@ -125,11 +119,12 @@ class Board {
     /**
      * A line is either a file, a rank or a diagonal. Throws error otherwise.
      */
+    // TODO might be buggy.. eg bishop on d3 can "jump" over black pawns
     fun hasPieceOnLineBetween(fromExclusive: Position, toExclusive: Position): Boolean {
         if (isOnSameFile(fromExclusive, toExclusive)) {
             val lo = min(fromExclusive.y, toExclusive.y)
             val hi = max(fromExclusive.y, toExclusive.y)
-            for (i in lo + 1 until hi) {
+            for (i in lo +1 until hi) {
                 if (this[Position(fromExclusive.x, i)] != null) return true
             }
             return false

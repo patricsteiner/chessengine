@@ -2,6 +2,7 @@ package io.github.patricsteiner.chessengine.domain.piece
 
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
+import kotlin.math.abs
 
 class Knight(color: Color, position: Position) : Piece(color, position) {
 
@@ -14,7 +15,7 @@ class Knight(color: Color, position: Position) : Piece(color, position) {
     }
 
     override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
-        return (deltaX == 1 && deltaY == 2) || (deltaX == 2 && deltaY == 1)
+        return (abs(deltaX) == 1 && abs(deltaY) == 2) || (abs(deltaX) == 2 && abs(deltaY) == 1)
     }
 
     override fun canJumpOverPieces(): Boolean {

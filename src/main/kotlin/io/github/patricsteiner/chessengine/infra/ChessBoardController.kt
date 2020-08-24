@@ -3,13 +3,11 @@ package io.github.patricsteiner.chessengine.infra
 import io.github.patricsteiner.chessengine.application.ChessBoardApplicationService
 import io.github.patricsteiner.chessengine.domain.BoardData
 import io.github.patricsteiner.chessengine.domain.Position
-import io.github.patricsteiner.chessengine.domain.piece.Piece
+import io.github.patricsteiner.chessengine.domain.piece.Piece.Color
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.DirectProcessor
 import reactor.core.publisher.Flux
 
@@ -28,13 +26,9 @@ class ChessBoardController(private val chessBoardApplicationService: ChessBoardA
 
     @PostMapping
     fun move(@RequestBody moveData: MoveData): ResponseEntity<BoardData> {
-//        return try {
-            val newBoardState = chessBoardApplicationService.move("1", Piece.Color.WHITE, Position(moveData.from.x, moveData.from.y), Position(moveData.to.x, moveData.to.y))
-            sink.next(newBoardState)
-            return ResponseEntity(newBoardState, HttpStatus.OK)
-//        } catch (e: Exception) {
-//            throw ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED, e.toString())
-//        }
+        val newBoardState = chessBoardApplicationService.move("1", moveData.color, Position(moveData.from.x, moveData.from.y), Position(moveData.to.x, moveData.to.y))
+        sink.next(newBoardState)
+        return ResponseEntity(newBoardState, HttpStatus.OK)
     }
 
     @GetMapping("possibleMoves")
@@ -45,5 +39,5 @@ class ChessBoardController(private val chessBoardApplicationService: ChessBoardA
 
 }
 
-data class MoveData(val from: PositionData, val to: PositionData)
+data class MoveData(val color: Color, val from: PositionData, val to: PositionData)
 data class PositionData(val x: Int, val y: Int)

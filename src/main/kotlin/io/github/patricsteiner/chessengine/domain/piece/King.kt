@@ -2,6 +2,7 @@ package io.github.patricsteiner.chessengine.domain.piece
 
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
+import kotlin.math.abs
 
 class King(color: Color, position: Position) : Piece(color, position) {
 
@@ -14,8 +15,8 @@ class King(color: Color, position: Position) : Piece(color, position) {
     }
 
     override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
-        if (deltaX > 1 || deltaY > 1) return false
-        return deltaX + deltaY <= 2
+        if (abs(deltaX) > 1 || abs(deltaY) > 1) return false
+        return abs(deltaX) + abs(deltaY) <= 2
     }
 
 }
