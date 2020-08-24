@@ -13,6 +13,11 @@ class ChessBoardApplicationService(private val boardRepository: BoardRepository)
         return BoardData.from(board)
     }
 
+    fun possibleMoves(boardId: String, from: Position): List<Position> {
+        val board = boardRepository.find(boardId) ?: throw RuntimeException("Can't find board")
+        return board.possibleMoves(from)
+    }
+
     fun get(boardId: String): BoardData {
         val board = boardRepository.find(boardId) ?: throw RuntimeException("Can't find board")
         return BoardData.from(board)

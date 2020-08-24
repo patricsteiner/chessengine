@@ -52,7 +52,7 @@ class Board {
         pieces.add(Queen(BLACK, Position('d', 8)))
         pieces.add(King(WHITE, Position('e', 1)))
         pieces.add(King(BLACK, Position('e', 8)))
-        pieces.add(Queen(WHITE, Position('e', 6))) // just for testing
+//        pieces.add(Queen(WHITE, Position('e', 6))) // just for testing
     }
 
     private operator fun get(position: Position): Piece? {
@@ -61,9 +61,10 @@ class Board {
 
     fun move(from: Position, to: Position): MoveRecord {
         val piece = getOrThrow(from)
-        if (turn != piece.color) {
-            throw IllegalArgumentException("It's not ${piece.color}'s turn")
-        }
+        // TODO buggy somehow
+//        if (turn != piece.color) {
+//            throw IllegalArgumentException("It's not ${piece.color}'s turn")
+//        }
         val victim = this[to]
         val isCapturingMove = victim != null
         if (isCapturingMove) {
@@ -74,7 +75,7 @@ class Board {
                 throw IllegalArgumentException("$piece on $from cannot capture $victim on $to")
             }
         } else if (!isCapturingMove && !piece.canMove(to)) {
-            throw IllegalArgumentException("$piece on $from cannot move to $to because position is occupied by $victim")
+            throw IllegalArgumentException("$piece on $from cannot move to $to")
         }
         if (!piece.canJumpOverPieces() && hasPieceOnLineBetween(from, to)) {
             throw IllegalArgumentException("$piece on $from cannot move to $to because there are other pieces in between")
@@ -87,6 +88,18 @@ class Board {
         }
         turn = if (turn == WHITE) BLACK else WHITE
         return moveRecord
+    }
+
+    fun possibleMoves(from: Position): List<Position> {
+        val possibleMoves = mutableListOf<Position>()
+        forEachPosition {
+            try {
+                val moveRecord = move(from, it)
+                undo(moveRecord)
+                possibleMoves.add(it)
+            } catch (e: Exception) { }
+        }
+        return possibleMoves
     }
 
     private fun getOrThrow(position: Position): Piece {
