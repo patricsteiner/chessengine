@@ -21,9 +21,23 @@ class Board {
         }
 
         fun isOnSameDiagonal(from: Position, to: Position): Boolean {
-            val deltaX = abs(from.x - to.x)
-            val deltaY = abs(from.y - to.y)
-            return deltaX == deltaY
+            val deltaX = from.x - to.x
+            val deltaY = from.y - to.y
+            return abs(deltaX) == abs(deltaY)
+        }
+
+        // Top left to bottom right
+        fun isOnSameMainDiagonal(from: Position, to: Position): Boolean {
+            if (from == to) return true
+            val isTopLeftToBottomRight = from.x < to.x && from.y < to.y
+            val isBottomRightToTopLeft = from.x > to.x && from.y > to.y
+            return isOnSameDiagonal(from, to) && (isTopLeftToBottomRight || isBottomRightToTopLeft)
+        }
+
+        // Top right to bottom left
+        fun isOnSameAntiDiagonal(from: Position, to: Position): Boolean {
+            if (from == to) return true
+            return isOnSameDiagonal(from, to) && !isOnSameMainDiagonal(from, to)
         }
     }
 
@@ -91,7 +105,8 @@ class Board {
                 val moveRecord = move(from, it)
                 undo(moveRecord)
                 possibleMoves.add(it)
-            } catch (e: Exception) { }
+            } catch (e: Exception) {
+            }
         }
         return possibleMoves
     }
@@ -124,7 +139,7 @@ class Board {
         if (isOnSameFile(fromExclusive, toExclusive)) {
             val lo = min(fromExclusive.y, toExclusive.y)
             val hi = max(fromExclusive.y, toExclusive.y)
-            for (i in lo +1 until hi) {
+            for (i in lo + 1 until hi) {
                 if (this[Position(fromExclusive.x, i)] != null) return true
             }
             return false
@@ -135,7 +150,7 @@ class Board {
                 if (this[Position(i, fromExclusive.y)] != null) return true
             }
             return false
-        } else if (isOnSameDiagonal(fromExclusive, toExclusive)) {
+        } else if (isOnSameMainDiagonal(fromExclusive, toExclusive)) {
             val loX = min(fromExclusive.x, toExclusive.x)
             val hiX = max(fromExclusive.x, toExclusive.x)
             val loY = min(fromExclusive.y, toExclusive.y)
@@ -146,6 +161,19 @@ class Board {
                 if (this[Position(x, y)] != null) return true
                 x++
                 y++
+            }
+            return false
+        } else if (isOnSameAntiDiagonal(fromExclusive, toExclusive)) {
+            val loX = min(fromExclusive.x, toExclusive.x)
+            val hiX = max(fromExclusive.x, toExclusive.x)
+            val loY = min(fromExclusive.y, toExclusive.y)
+            val hiY = max(fromExclusive.y, toExclusive.y)
+            var x = loX + 1
+            var y = hiY - 1
+            while (x < hiX && y > loY) {
+                if (this[Position(x, y)] != null) return true
+                x++
+                y--
             }
             return false
         }
