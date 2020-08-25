@@ -44,6 +44,8 @@ class Board {
     private val pieces = mutableListOf<Piece>() // TODO could use hashmap or sth instead
 
     var turn = WHITE
+    var winner: Color? = null
+    var draw: Boolean = false
 
     fun setup() {
         for (i in 0 until N_RANKS) {
@@ -98,6 +100,10 @@ class Board {
         return moveRecord
     }
 
+    private fun hasPossibleMoves(color: Color): Boolean {
+        return pieces.filter { it.color == color }.flatMap { possibleMoves(it.position) }.isNotEmpty()
+    }
+
     fun possibleMoves(from: Position): List<Position> {
         val possibleMoves = mutableListOf<Position>()
         forEachPosition {
@@ -134,7 +140,6 @@ class Board {
     /**
      * A line is either a file, a rank or a diagonal. Throws error otherwise.
      */
-    // TODO might be buggy.. eg bishop on d3 can "jump" over black pawns
     fun hasPieceOnLineBetween(fromExclusive: Position, toExclusive: Position): Boolean {
         if (isOnSameFile(fromExclusive, toExclusive)) {
             val lo = min(fromExclusive.y, toExclusive.y)
@@ -192,6 +197,14 @@ class Board {
             }
         }
         return check
+    }
+
+    fun isCheckMate(color: Color): Boolean {
+        return isCheck(color) && !hasPossibleMoves(color)
+    }
+
+    fun isStaleMate(color: Color): Boolean {
+        return !isCheck(color) && !hasPossibleMoves(color)
     }
 
     fun findKing(color: Color): Position? {

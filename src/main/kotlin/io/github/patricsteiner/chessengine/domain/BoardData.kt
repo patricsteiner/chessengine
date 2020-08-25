@@ -4,11 +4,13 @@ import io.github.patricsteiner.chessengine.domain.piece.Piece
 
 data class BoardData(
         val turn: Piece.Color,
+        val winner: Piece.Color?,
+        val draw: Boolean,
         val pieces: List<PieceData>
 ) {
     companion object {
         fun from(board: Board): BoardData {
-            return BoardData(board.turn, board.pieces().map { PieceData.from(it) })
+            return BoardData(board.turn, board.winner, board.draw, board.pieces().map { PieceData.from(it) })
         }
     }
 }

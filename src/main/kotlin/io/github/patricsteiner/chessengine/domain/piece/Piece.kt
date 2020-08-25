@@ -1,15 +1,20 @@
 package io.github.patricsteiner.chessengine.domain.piece
 
-import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.PieceData
-import kotlin.math.abs
+import io.github.patricsteiner.chessengine.domain.Position
 
 /**
  * A Piece must know it's possible moves and captures, _disregarding_ other pieces.
  */
 abstract class Piece(val color: Color, var position: Position) {
 
-    enum class Color { BLACK, WHITE }
+    enum class Color {
+        BLACK, WHITE;
+
+        fun opposite(): Color {
+            return if (this == WHITE) BLACK else WHITE
+        }
+    }
 
     companion object {
         fun of(type: Class<out Piece>, color: Color, position: Position): Piece {

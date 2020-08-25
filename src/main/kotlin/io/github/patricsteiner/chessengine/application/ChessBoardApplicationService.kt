@@ -19,7 +19,12 @@ class ChessBoardApplicationService(private val boardRepository: BoardRepository)
             throw IllegalArgumentException("$playerColor cannot move ${piece.color}'s pieces")
         }
         board.move(from, to)
-        board.turn = if (board.turn == WHITE) BLACK else WHITE
+        board.turn = board.turn.opposite()
+        if (board.isCheckMate(board.turn)) {
+            board.winner = board.turn.opposite()
+        } else if (board.isStaleMate(board.turn)) {
+            board.draw = true
+        }
         return BoardData.from(board)
     }
 
