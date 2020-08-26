@@ -11,10 +11,14 @@ data class GameData(val id: String, val player1: Player, val player2: Player, va
     }
 }
 
-data class BoardData(val pieces: List<PieceData>) {
+data class BoardData(val ranks: Int, val pieces: List<PieceData>, val asMatrix: List<List<PieceData?>>) {
     companion object {
         fun from(board: Board): BoardData {
-            return BoardData(board.pieces().map { PieceData.from(it) })
+            return BoardData(
+                    Board.N_RANKS,
+                    board.pieces().map { PieceData.from(it) },
+                    board.asMatrix().map { it.map { it?.let { PieceData.from(it) } } }
+            )
         }
     }
 }

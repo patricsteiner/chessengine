@@ -243,4 +243,9 @@ class Board {
         return pieces.toList()
     }
 
+    fun asMatrix(): List<List<Piece?>> {
+        val boardData = forEachPosition { this[it] }
+        return boardData.chunked(N_RANKS) as List<List<Piece?>>
+    }
+
 }
