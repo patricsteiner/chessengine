@@ -6,7 +6,15 @@ import io.github.patricsteiner.chessengine.domain.Position
 /**
  * A Piece must know it's possible moves and captures, _disregarding_ other pieces.
  */
-abstract class Piece(val color: Color, var position: Position) {
+abstract class Piece(val color: Color, initialPosition: Position) {
+
+    var moveCount = 0; private set
+
+    var position = initialPosition
+        set(value) {
+            moveCount++
+            field = value
+        }
 
     enum class Color {
         BLACK, WHITE;
@@ -30,6 +38,9 @@ abstract class Piece(val color: Color, var position: Position) {
 
     abstract fun toUnicodeSymbol(): String
 
+    /**
+     * Checks whether the piece has the ability to move to given position, disregarding any other pieces or rules on the board.
+     */
     fun canMove(to: Position): Boolean {
         val deltaX = position.x - to.x
         val deltaY = position.y - to.y
@@ -39,6 +50,9 @@ abstract class Piece(val color: Color, var position: Position) {
 
     protected abstract fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean
 
+    /**
+     * Checks whether the piece has the ability to capture a piece at the given position, disregarding any other pieces or rules on the board.
+     */
     fun canCapture(position: Position): Boolean {
         val deltaX = this.position.x - position.x
         val deltaY = this.position.y - position.y

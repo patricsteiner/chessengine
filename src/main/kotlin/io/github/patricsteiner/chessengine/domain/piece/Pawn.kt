@@ -5,7 +5,7 @@ import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.BLACK
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 import kotlin.math.abs
 
-class Pawn(color: Color, position: Position) : Piece(color, position) {
+class Pawn(color: Color, initialPosition: Position) : Piece(color, initialPosition) {
 
     override fun toChar(): Char {
         return if (color == WHITE) 'P' else 'p'

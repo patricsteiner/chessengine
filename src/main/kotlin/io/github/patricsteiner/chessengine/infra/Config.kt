@@ -1,15 +1,15 @@
 package io.github.patricsteiner.chessengine.infra
 
-import io.github.patricsteiner.chessengine.application.ChessBoardApplicationService
-import io.github.patricsteiner.chessengine.domain.BoardRepository
+import io.github.patricsteiner.chessengine.application.GameService
+import io.github.patricsteiner.chessengine.domain.GameRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class Config(@Autowired val boardRepository: BoardRepository) {
+class Config(@Autowired val gameRepository: GameRepository) {
 
     @Bean
-    fun chessBoardApplicationService() = ChessBoardApplicationService(boardRepository)
+    fun chessBoardApplicationService() = GameService(gameRepository)
 
 }

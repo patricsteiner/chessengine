@@ -4,7 +4,7 @@ import io.github.patricsteiner.chessengine.domain.Board
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 
-class Bishop(color: Color, position: Position) : Piece(color, position) {
+class Bishop(color: Color, initialPosition: Position) : Piece(color, initialPosition) {
 
     override fun toChar(): Char {
         return if (color == WHITE) 'B' else 'b'

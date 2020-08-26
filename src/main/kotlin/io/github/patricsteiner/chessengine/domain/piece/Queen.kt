@@ -6,7 +6,7 @@ import io.github.patricsteiner.chessengine.domain.Board.Companion.isOnSameRank
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 
-class Queen(color: Color, position: Position) : Piece(color, position) {
+class Queen(color: Color, initialPosition: Position) : Piece(color, initialPosition) {
 
     override fun toChar(): Char {
         return if (color == WHITE) 'Q' else 'q'

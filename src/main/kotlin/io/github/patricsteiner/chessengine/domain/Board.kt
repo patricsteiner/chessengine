@@ -43,11 +43,7 @@ class Board {
 
     private val pieces = mutableListOf<Piece>() // TODO could use hashmap or sth instead
 
-    var turn = WHITE
-    var winner: Color? = null
-    var draw: Boolean = false
-
-    fun setup() {
+    init {
         for (i in 0 until N_RANKS) {
             pieces.add(Pawn(WHITE, Position('a' + i, 2)))
             pieces.add(Pawn(BLACK, Position('a' + i, 7)))
@@ -99,6 +95,11 @@ class Board {
         }
         return moveRecord
     }
+
+//    fun bigCastle(color: Color) {
+//        val king = findKing(color)
+//        if (king)
+//    }
 
     private fun hasPossibleMoves(color: Color): Boolean {
         return pieces.filter { it.color == color }.flatMap { possibleMoves(it.position) }.isNotEmpty()

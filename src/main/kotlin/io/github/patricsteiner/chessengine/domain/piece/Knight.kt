@@ -4,7 +4,7 @@ import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 import kotlin.math.abs
 
-class Knight(color: Color, position: Position) : Piece(color, position) {
+class Knight(color: Color, initialPosition: Position) : Piece(color, initialPosition) {
 
     override fun toChar(): Char {
         return if (color == WHITE) 'N' else 'n'
