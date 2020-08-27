@@ -10,11 +10,7 @@ abstract class Piece(val color: Color, initialPosition: Position) {
 
     var moveCount = 0; private set
 
-    var position = initialPosition
-        set(value) {
-            moveCount++
-            field = value
-        }
+    var position = initialPosition; private set
 
     enum class Color {
         BLACK, WHITE;
@@ -30,6 +26,11 @@ abstract class Piece(val color: Color, initialPosition: Position) {
         }
     }
 
+    fun move(to: Position) {
+        position = to
+        moveCount++
+    }
+
     override fun toString(): String {
         return toUnicodeSymbol()
     }
@@ -39,28 +40,30 @@ abstract class Piece(val color: Color, initialPosition: Position) {
     abstract fun toUnicodeSymbol(): String
 
     /**
-     * Checks whether the piece has the ability to move to given position, disregarding any other pieces or rules on the board.
+     * Checks whether the piece has the ability to move from its current position to the given position,
+     * disregarding any other pieces or rules on the board.
      */
-    fun canMove(to: Position): Boolean {
+    fun hasAbilityToMove(to: Position): Boolean {
         val deltaX = position.x - to.x
         val deltaY = position.y - to.y
         if (deltaX == 0 && deltaY == 0) return false // cannot stay on same position
-        return canMove(to, deltaX, deltaY)
+        return hasAbilityToMove(to, deltaX, deltaY)
     }
 
-    protected abstract fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean
+    protected abstract fun hasAbilityToMove(to: Position, deltaX: Int, deltaY: Int): Boolean
 
     /**
-     * Checks whether the piece has the ability to capture a piece at the given position, disregarding any other pieces or rules on the board.
+     * Checks whether the piece has the ability to capture a piece at the given position,
+     * disregarding any other pieces or rules on the board.
      */
-    fun canCapture(position: Position): Boolean {
+    fun hasAbilityToCapture(position: Position): Boolean {
         val deltaX = this.position.x - position.x
         val deltaY = this.position.y - position.y
-        return canCapture(position, deltaX, deltaY)
+        return hasAbilityToCapture(position, deltaX, deltaY)
     }
 
-    protected open fun canCapture(position: Position, deltaX: Int, deltaY: Int): Boolean {
-        return canMove(position, deltaX, deltaY)
+    protected open fun hasAbilityToCapture(position: Position, deltaX: Int, deltaY: Int): Boolean {
+        return hasAbilityToMove(position, deltaX, deltaY)
     }
 
     open fun canJumpOverPieces(): Boolean {

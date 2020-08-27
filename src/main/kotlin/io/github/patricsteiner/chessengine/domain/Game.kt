@@ -15,7 +15,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
     }
 
     val board = Board()
-    val moveHistory = mutableListOf<MoveRecord>()
+    private val moveHistory = mutableListOf<MoveRecord>()
     var turn = WHITE; private set
     var winner: Piece.Color? = null; private set
     var draw: Boolean = false; private set

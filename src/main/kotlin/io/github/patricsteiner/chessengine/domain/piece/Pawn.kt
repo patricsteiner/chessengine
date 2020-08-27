@@ -15,7 +15,7 @@ class Pawn(color: Color, initialPosition: Position) : Piece(color, initialPositi
         return if (color == WHITE) "\u2659" else "\u265F"
     }
 
-    override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
+    override fun hasAbilityToMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
         if (color == WHITE) {
             if ((deltaY == 1 || position.rank == 2 && deltaY == 2) && deltaX == 0) return true
         } else if (color == BLACK) {
@@ -24,7 +24,7 @@ class Pawn(color: Color, initialPosition: Position) : Piece(color, initialPositi
         return false
     }
 
-    override fun canCapture(position: Position, deltaX: Int, deltaY: Int): Boolean {
+    override fun hasAbilityToCapture(position: Position, deltaX: Int, deltaY: Int): Boolean {
         if (color == WHITE) {
             return abs(deltaX) == 1 && deltaY == 1
         } else if (color == BLACK) {
@@ -32,4 +32,5 @@ class Pawn(color: Color, initialPosition: Position) : Piece(color, initialPositi
         }
         return false
     }
+
 }

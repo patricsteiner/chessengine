@@ -14,7 +14,7 @@ class Knight(color: Color, initialPosition: Position) : Piece(color, initialPosi
         return if (color == WHITE) "\u2658" else "\u265E"
     }
 
-    override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
+    override fun hasAbilityToMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
         return (abs(deltaX) == 1 && abs(deltaY) == 2) || (abs(deltaX) == 2 && abs(deltaY) == 1)
     }
 

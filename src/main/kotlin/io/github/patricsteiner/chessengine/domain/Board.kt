@@ -41,7 +41,7 @@ class Board {
         }
     }
 
-    private val pieces = mutableListOf<Piece>() // TODO could use hashmap or sth instead
+    private val pieces = mutableListOf<Piece>() // could use hashmap or sth instead
 
     init {
         for (i in 0 until N_RANKS) {
@@ -78,10 +78,10 @@ class Board {
             if (piece.color == victim?.color) {
                 throw IllegalArgumentException("$piece on $from cannot friendly-fire $victim on $to")
             }
-            if (!piece.canCapture(to)) {
+            if (!piece.hasAbilityToCapture(to)) {
                 throw IllegalArgumentException("$piece on $from cannot capture $victim on $to")
             }
-        } else if (!isCapturingMove && !piece.canMove(to)) {
+        } else if (!isCapturingMove && !piece.hasAbilityToMove(to)) {
             throw IllegalArgumentException("$piece on $from cannot move to $to")
         }
         if (!piece.canJumpOverPieces() && hasPieceOnLineBetween(from, to)) {
@@ -107,7 +107,7 @@ class Board {
 
     fun possibleMoves(from: Position): List<Position> {
         val possibleMoves = mutableListOf<Position>()
-        forEachPosition {
+        eachPosition {
             try {
                 val moveRecord = move(from, it)
                 undo(moveRecord)
@@ -127,12 +127,12 @@ class Board {
             pieces.removeIf { it.position == moveRecord.victim.position }
         }
         val piece = getOrThrow(moveRecord.piece.position)
-        piece.position = moveRecord.to
+        piece.move(moveRecord.to)
     }
 
     fun undo(moveRecord: MoveRecord) {
-        val piece = getOrThrow(moveRecord.to)
-        piece.position = moveRecord.piece.position
+        pieces.removeIf { it.position == moveRecord.to }
+        pieces.add(moveRecord.piece)
         if (moveRecord.victim != null) {
             pieces.add(moveRecord.victim)
         }
@@ -189,9 +189,9 @@ class Board {
     fun isCheck(color: Color): Boolean {
         var check = false
         val kingPos = findKing(color) ?: throw IllegalStateException("There is no king")
-        forEachPosition {
+        eachPosition {
             val piece = this[it]
-            if (piece != null && piece.color != color && piece.canCapture(kingPos) &&
+            if (piece != null && piece.color != color && piece.hasAbilityToCapture(kingPos) &&
                     (piece.canJumpOverPieces() || !hasPieceOnLineBetween(piece.position, kingPos))) {
                 check = true
                 println("DEBUG: King on $kingPos is check by $piece on ${piece.position}")
@@ -210,14 +210,14 @@ class Board {
 
     fun findKing(color: Color): Position? {
         var kingPos: Position? = null
-        forEachPosition {
+        eachPosition {
             if (this[it] is King && this[it]?.color == color) kingPos = it
         }
         return kingPos
     }
 
-    private fun forEachPosition(function: (Position) -> Any?): MutableList<Any?> {
-        val results = mutableListOf<Any?>()
+    private fun <R> eachPosition(function: (Position) -> R): List<R> {
+        val results = mutableListOf<R>()
         for (y in 0 until N_RANKS) {
             for (x in 0 until N_RANKS) {
                 val pos = Position(x, y)
@@ -228,7 +228,7 @@ class Board {
     }
 
     override fun toString(): String {
-        val boardData = forEachPosition { this[it]?.toString() }
+        val boardData = eachPosition { this[it]?.toString() }
         val sb = StringBuilder()
         boardData.forEachIndexed { idx, pieceAsString ->
             sb.append(pieceAsString ?: "\u2610").append("\t")
@@ -244,8 +244,8 @@ class Board {
     }
 
     fun asMatrix(): List<List<Piece?>> {
-        val boardData = forEachPosition { this[it] }
-        return boardData.chunked(N_RANKS) as List<List<Piece?>>
+        val boardData = eachPosition { this[it] }
+        return boardData.chunked(N_RANKS)
     }
 
 }

@@ -16,7 +16,7 @@ class Queen(color: Color, initialPosition: Position) : Piece(color, initialPosit
         return if (color == WHITE) "\u2655" else "\u265B"
     }
 
-    override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
+    override fun hasAbilityToMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
         return (isOnSameFile(position, to) || isOnSameRank(position, to) || isOnSameDiagonal(position, to))
     }
 

@@ -15,7 +15,7 @@ class Rook(color: Color, initialPosition: Position) : Piece(color, initialPositi
         return if (color == WHITE) "\u2656" else "\u265C"
     }
 
-    override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
+    override fun hasAbilityToMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
         return (isOnSameFile(position, to) || isOnSameRank(position, to))
     }
 

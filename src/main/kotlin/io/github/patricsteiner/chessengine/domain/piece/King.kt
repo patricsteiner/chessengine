@@ -14,7 +14,7 @@ class King(color: Color, initialPosition: Position) : Piece(color, initialPositi
         return if (color == WHITE) "\u2654" else "\u265A"
     }
 
-    override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
+    override fun hasAbilityToMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
         if (abs(deltaX) > 1 || abs(deltaY) > 1) return false
         return abs(deltaX) + abs(deltaY) <= 2
     }

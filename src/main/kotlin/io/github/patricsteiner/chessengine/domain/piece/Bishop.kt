@@ -14,7 +14,7 @@ class Bishop(color: Color, initialPosition: Position) : Piece(color, initialPosi
         return if (color == WHITE) "\u2657" else "\u265D"
     }
 
-    override fun canMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
+    override fun hasAbilityToMove(to: Position, deltaX: Int, deltaY: Int): Boolean {
         return Board.isOnSameDiagonal(position, to)
     }
 
