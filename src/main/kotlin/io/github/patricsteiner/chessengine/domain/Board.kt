@@ -70,53 +70,14 @@ class Board {
         return pieces.find { it.position == position }
     }
 
-    fun move(from: Position, to: Position): MoveRecord {
-        val piece = getOrThrow(from)
-        val victim = this[to]
-        val isCapturingMove = victim != null
-        if (isCapturingMove) {
-            if (piece.color == victim?.color) {
-                throw IllegalArgumentException("$piece on $from cannot friendly-fire $victim on $to")
-            }
-            if (!piece.hasAbilityToCapture(to)) {
-                throw IllegalArgumentException("$piece on $from cannot capture $victim on $to")
-            }
-        } else if (!isCapturingMove && !piece.hasAbilityToMove(to)) {
-            throw IllegalArgumentException("$piece on $from cannot move to $to")
-        }
-        if (!piece.canJumpOverPieces() && hasPieceOnLineBetween(from, to)) {
-            throw IllegalArgumentException("$piece on $from cannot move to $to because there are other pieces in between")
-        }
-        val moveRecord = MoveRecord(piece, to, victim)
-        apply(moveRecord)
-        if (isCheck(moveRecord.piece.color)) {
-            undo(moveRecord)
-            throw IllegalArgumentException("$piece on $from cannot move to $to (cannot put it's king into check)")
-        }
-        return moveRecord
-    }
+
 
 //    fun bigCastle(color: Color) {
 //        val king = findKing(color)
 //        if (king)
 //    }
 
-    private fun hasPossibleMoves(color: Color): Boolean {
-        return pieces.filter { it.color == color }.flatMap { possibleMoves(it.position) }.isNotEmpty()
-    }
 
-    fun possibleMoves(from: Position): List<Position> {
-        val possibleMoves = mutableListOf<Position>()
-        eachPosition {
-            try {
-                val moveRecord = move(from, it)
-                undo(moveRecord)
-                possibleMoves.add(it)
-            } catch (e: Exception) {
-            }
-        }
-        return possibleMoves
-    }
 
     private fun getOrThrow(position: Position): Piece {
         return this[position] ?: throw IllegalArgumentException("No piece found on $position")
@@ -186,28 +147,6 @@ class Board {
         throw IllegalArgumentException("Positions must be on same rank, file or diagonal")
     }
 
-    fun isCheck(color: Color): Boolean {
-        var check = false
-        val kingPos = findKing(color) ?: throw IllegalStateException("There is no king")
-        eachPosition {
-            val piece = this[it]
-            if (piece != null && piece.color != color && piece.hasAbilityToCapture(kingPos) &&
-                    (piece.canJumpOverPieces() || !hasPieceOnLineBetween(piece.position, kingPos))) {
-                check = true
-                println("DEBUG: King on $kingPos is check by $piece on ${piece.position}")
-            }
-        }
-        return check
-    }
-
-    fun isCheckMate(color: Color): Boolean {
-        return isCheck(color) && !hasPossibleMoves(color)
-    }
-
-    fun isStaleMate(color: Color): Boolean {
-        return !isCheck(color) && !hasPossibleMoves(color)
-    }
-
     fun findKing(color: Color): Position? {
         var kingPos: Position? = null
         eachPosition {
@@ -216,7 +155,7 @@ class Board {
         return kingPos
     }
 
-    private fun <R> eachPosition(function: (Position) -> R): List<R> {
+    internal fun <R> eachPosition(function: (Position) -> R): List<R> {
         val results = mutableListOf<R>()
         for (y in 0 until N_RANKS) {
             for (x in 0 until N_RANKS) {

@@ -4,6 +4,7 @@ import io.github.patricsteiner.chessengine.application.GameService
 import io.github.patricsteiner.chessengine.domain.GameData
 import io.github.patricsteiner.chessengine.domain.Player
 import io.github.patricsteiner.chessengine.domain.Position
+import io.github.patricsteiner.chessengine.domain.piece.Piece.Color
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -26,14 +27,14 @@ class ChessGameController(private val gameService: GameService) {
 
     @PostMapping("game/{id}")
     fun applyMove(@PathVariable id: String, @RequestBody moveData: MoveData): ResponseEntity<GameData> {
-        val newGameData = gameService.move(id, moveData.player, Position(moveData.from.x, moveData.from.y), Position(moveData.to.x, moveData.to.y))
+        val newGameData = gameService.move(id, moveData.player.color, Position(moveData.from.x, moveData.from.y), Position(moveData.to.x, moveData.to.y))
         sink.next(newGameData)
         return ResponseEntity(newGameData, HttpStatus.OK)
     }
 
     @GetMapping("game/{id}/possibleMoves")
-    fun possibleMoves(@PathVariable id: String, @RequestParam x: Int, @RequestParam y: Int): List<PositionData> {
-        return gameService.possibleMoves(id, Position(x, y))
+    fun possibleMoves(@PathVariable id: String, @RequestParam color: Color, @RequestParam x: Int, @RequestParam y: Int): List<PositionData> {
+        return gameService.possibleMoves(id, color, Position(x, y))
                 .map { PositionData(it.x, it.y) }
     }
 
