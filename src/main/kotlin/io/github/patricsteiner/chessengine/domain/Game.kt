@@ -1,5 +1,6 @@
 package io.github.patricsteiner.chessengine.domain
 
+import io.github.patricsteiner.chessengine.domain.piece.King
 import io.github.patricsteiner.chessengine.domain.piece.Pawn
 import io.github.patricsteiner.chessengine.domain.piece.Piece
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color
@@ -69,6 +70,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
         if (color != piece.color) {
             throw IllegalArgumentException("$color cannot move ${piece.color}'s pieces")
         }
+        var combinedMove: MoveRecord? = null
         val victim = board[to]
         val isCapturingMove = victim != null
         if (isCapturingMove) {
@@ -78,8 +80,9 @@ class Game(val id: String, val player1: Player, val player2: Player) {
             if (!piece.hasAbilityToCapture(to)) {
                 throw IllegalArgumentException("$piece on $from cannot capture $victim on $to")
             }
-        } else if (!isCapturingMove && !piece.hasAbilityToMove(to)) {
-            throw IllegalArgumentException("$piece on $from cannot move to $to")
+        } else if (!piece.hasAbilityToMove(to)) {
+            combinedMove = createCastleMoveIfPossible(piece, to)
+                    ?: throw IllegalArgumentException("$piece on $from cannot move to $to")
         }
         if (!piece.canJumpOverPieces() && board.hasPieceOnLineBetween(from, to)) {
             throw IllegalArgumentException("$piece on $from cannot move to $to because there are other pieces in between")
@@ -88,7 +91,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
         if (piece is Pawn && (color == WHITE && to.rank == 8 || color == BLACK && to.rank == 1)) {
             promotionTo = Queen(color, to)
         }
-        val moveRecord = MoveRecord(piece, to, victim, promotionTo)
+        val moveRecord = MoveRecord(piece, to, victim, promotionTo, combinedMove)
         board.apply(moveRecord)
         if (isCheck(color)) {
             board.undo(moveRecord)
@@ -96,6 +99,40 @@ class Game(val id: String, val player1: Player, val player2: Player) {
         }
         board.undo(moveRecord) // always undo the move, in this function we just need to find out if the move is legal
         return moveRecord
+    }
+
+    // TODO add restriction that you cannot castle when a field the king moves over is check
+    private fun createCastleMoveIfPossible(piece: Piece, to: Position): MoveRecord? {
+        if (piece is King && piece.moveCount == 0) {
+            if (to.rank == 1) {
+                if (to.file == 'c' &&
+                        board[Position('a', 1)]?.moveCount == 0 &&
+                        board[Position('b', 1)] == null &&
+                        board[Position('c', 1)] == null &&
+                        board[Position('d', 1)] == null) {
+                    return MoveRecord(board[Position('a', 1)]!!, Position('d', 1))
+                } else if (to.file == 'g' &&
+                        board[Position('h', 1)]?.moveCount == 0 &&
+                        board[Position('f', 1)] == null &&
+                        board[Position('g', 1)] == null) {
+                    return MoveRecord(board[Position('h', 1)]!!, Position('f', 1))
+                }
+            } else if (to.rank == 8) {
+                if (to.file == 'c' &&
+                        board[Position('a', 8)]?.moveCount == 0 &&
+                        board[Position('b', 8)] == null &&
+                        board[Position('c', 8)] == null &&
+                        board[Position('d', 8)] == null) {
+                    return MoveRecord(board[Position('a', 8)]!!, Position('d', 8))
+                } else if (to.file == 'g' &&
+                        board[Position('h', 8)]?.moveCount == 0 &&
+                        board[Position('f', 8)] == null &&
+                        board[Position('g', 8)] == null) {
+                    return MoveRecord(board[Position('h', 8)]!!, Position('f', 8))
+                }
+            }
+        }
+        return null
     }
 
     fun move(color: Color, from: Position, to: Position) {

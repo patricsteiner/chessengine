@@ -95,6 +95,7 @@ class Board {
             val piece = getOrThrow(moveRecord.piece.position)
             piece.move(moveRecord.to)
         }
+        moveRecord.combinedMove?.let { apply(it) }
     }
 
     fun undo(moveRecord: MoveRecord) {
@@ -103,6 +104,7 @@ class Board {
         if (moveRecord.victim != null) {
             pieces.add(moveRecord.victim)
         }
+        moveRecord.combinedMove?.let { undo(it) }
     }
 
     /**
