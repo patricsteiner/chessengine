@@ -1,7 +1,11 @@
 package io.github.patricsteiner.chessengine.domain
 
+import io.github.patricsteiner.chessengine.domain.piece.Pawn
+import io.github.patricsteiner.chessengine.domain.piece.Piece
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color
+import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.BLACK
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
+import io.github.patricsteiner.chessengine.domain.piece.Queen
 import java.util.UUID.randomUUID
 
 class Game(val id: String, val player1: Player, val player2: Player) {
@@ -19,19 +23,19 @@ class Game(val id: String, val player1: Player, val player2: Player) {
     var winner: Color? = null; private set
     var draw: Boolean = false; private set
 
-    fun isOver(): Boolean {
+    private fun isOver(): Boolean {
         return winner != null || draw
     }
 
-    fun isCheckMate(color: Color): Boolean {
+    private fun isCheckMate(color: Color): Boolean {
         return isCheck(color) && !hasPossibleMoves(color)
     }
 
-    fun isStaleMate(color: Color): Boolean {
+    private fun isStaleMate(color: Color): Boolean {
         return !isCheck(color) && !hasPossibleMoves(color)
     }
 
-    fun isCheck(color: Color): Boolean {
+    private fun isCheck(color: Color): Boolean {
         var check = false
         val kingPos = board.findKing(color) ?: throw IllegalStateException("There is no king")
         board.eachPosition {
@@ -60,7 +64,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
         return possibleMoves
     }
 
-    fun createMoveRecordIfLegal(color: Color, from: Position, to: Position): MoveRecord {
+    private fun createMoveRecordIfLegal(color: Color, from: Position, to: Position): MoveRecord {
         val piece = board[from] ?: throw IllegalArgumentException("No piece")
         if (color != piece.color) {
             throw IllegalArgumentException("$color cannot move ${piece.color}'s pieces")
@@ -80,7 +84,11 @@ class Game(val id: String, val player1: Player, val player2: Player) {
         if (!piece.canJumpOverPieces() && board.hasPieceOnLineBetween(from, to)) {
             throw IllegalArgumentException("$piece on $from cannot move to $to because there are other pieces in between")
         }
-        val moveRecord = MoveRecord(piece, to, victim)
+        var promotionTo: Piece? = null
+        if (piece is Pawn && (color == WHITE && to.rank == 8 || color == BLACK && to.rank == 1)) {
+            promotionTo = Queen(color, to)
+        }
+        val moveRecord = MoveRecord(piece, to, victim, promotionTo)
         board.apply(moveRecord)
         if (isCheck(color)) {
             board.undo(moveRecord)

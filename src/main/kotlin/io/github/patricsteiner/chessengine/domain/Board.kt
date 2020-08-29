@@ -8,6 +8,9 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * The Chessbaord can just apply or undo a MoveRecord, but it is not responsible for checking any rules. This is done in the Game class.
+ */
 class Board {
 
     companion object {
@@ -71,12 +74,10 @@ class Board {
     }
 
 
-
 //    fun bigCastle(color: Color) {
 //        val king = findKing(color)
 //        if (king)
 //    }
-
 
 
     private fun getOrThrow(position: Position): Piece {
@@ -87,8 +88,13 @@ class Board {
         if (moveRecord.victim != null) {
             pieces.removeIf { it.position == moveRecord.victim.position }
         }
-        val piece = getOrThrow(moveRecord.piece.position)
-        piece.move(moveRecord.to)
+        if (moveRecord.promotionTo != null) {
+            pieces.removeIf { it.position == moveRecord.piece.position }
+            pieces.add(moveRecord.promotionTo)
+        } else {
+            val piece = getOrThrow(moveRecord.piece.position)
+            piece.move(moveRecord.to)
+        }
     }
 
     fun undo(moveRecord: MoveRecord) {
