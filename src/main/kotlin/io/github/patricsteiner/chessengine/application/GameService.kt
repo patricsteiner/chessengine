@@ -24,6 +24,20 @@ class GameService(private val gameRepository: GameRepository) {
         return GameData.from(game)
     }
 
+    @ExperimentalStdlibApi
+    fun undo(gameId: String): GameData {
+        val game = getGame(gameId)
+        game.undo()
+        return GameData.from(game)
+    }
+
+    @ExperimentalStdlibApi
+    fun redo(gameId: String): GameData {
+        val game = getGame(gameId)
+        game.redo()
+        return GameData.from(game)
+    }
+
     private fun getGame(gameId: String): Game {
         return gameRepository.find(gameId) ?: throw RuntimeException("Can't find game")
     }

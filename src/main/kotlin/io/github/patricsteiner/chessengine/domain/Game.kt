@@ -20,85 +20,87 @@ class Game(val id: String, val player1: Player, val player2: Player) {
 
     val board = Board()
     private val moveHistory = mutableListOf<MoveRecord>()
+    private val undoHistory = mutableListOf<MoveRecord>()
     var turn = WHITE; private set
     var winner: Color? = null; private set
+    var check: Color? = null; private set
     var draw: Boolean = false; private set
+
+    init {
+        board.setupDefaultChessPieces()
+//        board.addAdditionalPieces()
+    }
 
     private fun isOver(): Boolean {
         return winner != null || draw
     }
 
-    private fun isCheckMate(color: Color): Boolean {
-        return isCheck(color) && !hasPossibleMoves(color)
-    }
-
-    private fun isStaleMate(color: Color): Boolean {
-        return !isCheck(color) && !hasPossibleMoves(color)
-    }
-
     private fun isCheck(color: Color): Boolean {
-        var check = false
         val kingPos = board.findKing(color) ?: throw IllegalStateException("There is no king")
-        board.eachPosition {
-            val piece = board[it]
-            if (piece != null && piece.color != color && piece.hasAbilityToCapture(kingPos) &&
-                    (piece.canJumpOverPieces() || !board.hasPieceOnLineBetween(piece.position, kingPos))) {
-                check = true
-            }
-        }
-        return check
+        return board.pieces()
+                .filter { it.color == color.opposite() }
+                .filter { it.hasAbilityToCapture(kingPos) }
+                .any { it.canJumpOverPieces() || !board.hasPieceOnLineBetween(it.position, kingPos) } // TODO problem exception?
     }
 
     private fun hasPossibleMoves(color: Color): Boolean {
         return board.pieces().filter { it.color == color }.flatMap { possibleMoves(color, it.position) }.isNotEmpty()
     }
 
+    @ExperimentalStdlibApi
+    fun undo() {
+        if (moveHistory.isEmpty()) return
+        val lastMove = moveHistory.removeLast()
+        board.undo(lastMove)
+        undoHistory.add(lastMove)
+    }
+
+    @ExperimentalStdlibApi
+    fun redo() {
+        if (undoHistory.isEmpty()) return
+        val lastUndoneMove = undoHistory.removeLast()
+        board.apply(lastUndoneMove)
+        moveHistory.add(lastUndoneMove)
+    }
+
     fun possibleMoves(color: Color, from: Position): List<Position> {
         val possibleMoves = mutableListOf<Position>()
         board.eachPosition {
-            try {
-                createMoveRecordIfLegal(color, from, it)
+            if (makeMoveRecordIfLegal(color, from, it) != null) {
                 possibleMoves.add(it)
-            } catch (e: Exception) {
             }
         }
         return possibleMoves
     }
 
-    private fun createMoveRecordIfLegal(color: Color, from: Position, to: Position): MoveRecord {
-        val piece = board[from] ?: throw IllegalArgumentException("No piece")
-        if (color != piece.color) {
-            throw IllegalArgumentException("$color cannot move ${piece.color}'s pieces")
-        }
-        var combinedMove: MoveRecord? = null
+    private fun makeMoveRecordIfLegal(color: Color, from: Position, to: Position): MoveRecord? {
+        val piece = board[from] ?: throw IllegalArgumentException("No piece on $from")
         val victim = board[to]
-        val isCapturingMove = victim != null
-        if (isCapturingMove) {
-            if (piece.color == victim?.color) {
-                throw IllegalArgumentException("$piece on $from cannot friendly-fire $victim on $to")
-            }
-            if (!piece.hasAbilityToCapture(to)) {
-                throw IllegalArgumentException("$piece on $from cannot capture $victim on $to")
-            }
-        } else if (!piece.hasAbilityToMove(to)) {
-            combinedMove = createCastleMoveIfPossible(piece, to)
-                    ?: throw IllegalArgumentException("$piece on $from cannot move to $to")
+        val moveRecord = MoveRecord(piece, to, victim)
+
+        if (violatesGameRules(color, moveRecord)) return null
+
+        var combinedMove: MoveRecord? = null
+        if (!pieceHasAbilityToExecute(moveRecord)) {
+            combinedMove = createCastleMoveIfPossible(piece, to) // TODO does not work properly
+            if (combinedMove == null) return null
         }
-        if (!piece.canJumpOverPieces() && board.hasPieceOnLineBetween(from, to)) {
-            throw IllegalArgumentException("$piece on $from cannot move to $to because there are other pieces in between")
+        if (otherPieceBlocksMove(moveRecord)) return null
+        if (resultsInCheck(moveRecord)) return null
+
+        val promotionTo = getPromotionIfPossible(piece, to) // TODO does not work properly with undo
+
+        if (promotionTo != null) {
+            return MoveRecord(moveRecord.piece, moveRecord.to, moveRecord.victim, PieceData.from(promotionTo), combinedMove)
         }
-        var promotionTo: Piece? = null
-        if (piece is Pawn && (color == WHITE && to.rank == 8 || color == BLACK && to.rank == 1)) {
-            promotionTo = Queen(color, to)
-        }
-        val moveRecord = MoveRecord(piece, to, victim, promotionTo, combinedMove)
-        board.apply(moveRecord)
-        if (isCheck(color)) {
-            board.undo(moveRecord)
-            throw IllegalArgumentException("$piece on $from cannot move to $to (cannot put it's king into check)")
-        }
-        board.undo(moveRecord) // always undo the move, in this function we just need to find out if the move is legal
         return moveRecord
+    }
+
+    private fun getPromotionIfPossible(piece: Piece, to: Position): Piece? {
+        if (piece is Pawn && (piece.color == WHITE && to.rank == 8 || piece.color == BLACK && to.rank == 1)) {
+            return Queen(piece.color, to)
+        }
+        return null
     }
 
     // TODO add restriction that you cannot castle when a field the king moves over is check
@@ -140,18 +142,54 @@ class Game(val id: String, val player1: Player, val player2: Player) {
             throw IllegalArgumentException("Game is over")
         }
         if (color != turn) {
-            throw IllegalArgumentException("It's not ${color}'s turn")
+            throw IllegalArgumentException("It's not $color's turn")
         }
-        val moveRecord = createMoveRecordIfLegal(color, from, to)
+        val moveRecord = makeMoveRecordIfLegal(color, from, to)
+                ?: throw IllegalArgumentException("This is not a legal move")
         board.apply(moveRecord)
         moveHistory.add(moveRecord)
-        val enemyColor = color.opposite()
-        if (isCheckMate(enemyColor)) {
-            winner = color
-        } else if (isStaleMate(enemyColor)) {
-            draw = true
+        val enemyColor = turn.opposite()
+        if (!hasPossibleMoves(enemyColor)) {
+            if (isCheck(enemyColor)) {
+                winner = turn // checkmate
+            } else {
+                draw = true // stalemate
+            }
         }
         turn = enemyColor
+    }
+
+    private fun resultsInCheck(moveRecord: MoveRecord): Boolean {
+        board.apply(moveRecord)
+        val resultsInCheck = isCheck(moveRecord.piece.color)
+        board.undo(moveRecord) // TODO sometimes is not exec when haspieceonline throws
+        return resultsInCheck
+    }
+
+    private fun violatesGameRules(color: Color, moveRecord: MoveRecord): Boolean {
+        if (moveRecord.piece.color != color) {
+            return true // "Cannot move enemy pieces"
+        }
+        if (moveRecord.piece.color == board[moveRecord.to]?.color) {
+            return true // "Cannot friendly-fire"
+        }
+        return false
+    }
+
+    private fun otherPieceBlocksMove(moveRecord: MoveRecord): Boolean {
+        if (moveRecord.piece.toPiece().canJumpOverPieces()) return false
+        return board.hasPieceOnLineBetween(moveRecord.piece.position, moveRecord.to)
+    }
+
+    private fun pieceHasAbilityToExecute(moveRecord: MoveRecord): Boolean {
+        val piece = moveRecord.piece.toPiece()
+        val isCapturingMove = moveRecord.victim != null
+        if (isCapturingMove && piece.hasAbilityToCapture(moveRecord.to)) {
+            return true
+        } else if (!isCapturingMove && piece.hasAbilityToMove(moveRecord.to)) {
+            return true
+        }
+        return false
     }
 
 }

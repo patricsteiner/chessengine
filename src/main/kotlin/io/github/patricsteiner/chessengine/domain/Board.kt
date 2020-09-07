@@ -11,7 +11,7 @@ import kotlin.math.min
 /**
  * The Chessbaord can just apply or undo a MoveRecord, but it is not responsible for checking any rules. This is done in the Game class.
  */
-class Board {
+class Board(pieces: List<Piece> = mutableListOf()) {
 
     companion object {
         const val N_RANKS = 8
@@ -44,9 +44,17 @@ class Board {
         }
     }
 
-    private val pieces = mutableListOf<Piece>() // could use hashmap or sth instead
+    private val pieces = pieces.toMutableList()  // could use hashmap or sth instead
 
-    init {
+    fun addAdditionalPieces() {
+        pieces.add(Scout(WHITE, Position('a', 3)))
+        pieces.add(Scout(BLACK, Position('a', 6)))
+        pieces.add(Archer(WHITE, Position('h', 3)))
+        pieces.add(Archer(BLACK, Position('h', 6)))
+    }
+
+    fun setupDefaultChessPieces() {
+        pieces.clear()
         for (i in 0 until N_RANKS) {
             pieces.add(Pawn(WHITE, Position('a' + i, 2)))
             pieces.add(Pawn(BLACK, Position('a' + i, 7)))
@@ -73,36 +81,38 @@ class Board {
         return pieces.find { it.position == position }
     }
 
+    private fun get(id: String): Piece {
+        return pieces.find { it.id == id } ?: throw IllegalArgumentException("No piece found with id $id")
+    }
 
-//    fun bigCastle(color: Color) {
-//        val king = findKing(color)
-//        if (king)
-//    }
-
-
-    private fun getOrThrow(position: Position): Piece {
-        return this[position] ?: throw IllegalArgumentException("No piece found on $position")
+    private fun remove(id: String) {
+        val removed = pieces.removeIf { it.id == id }
+        if (!removed) {
+            throw IllegalStateException("There is no piece with id $id")
+        }
     }
 
     fun apply(moveRecord: MoveRecord) {
+        val piece = get(moveRecord.piece.id)
+        piece.move(moveRecord.to)
         if (moveRecord.victim != null) {
-            pieces.removeIf { it.position == moveRecord.victim.position }
+            remove(moveRecord.victim.id)
         }
         if (moveRecord.promotionTo != null) {
-            pieces.removeIf { it.position == moveRecord.piece.position }
-            pieces.add(moveRecord.promotionTo)
-        } else {
-            val piece = getOrThrow(moveRecord.piece.position)
-            piece.move(moveRecord.to)
+            remove(moveRecord.piece.id)
+            pieces.add(moveRecord.promotionTo.toPiece())
         }
         moveRecord.combinedMove?.let { apply(it) }
     }
 
     fun undo(moveRecord: MoveRecord) {
-        pieces.removeIf { it.position == moveRecord.to }
-        pieces.add(moveRecord.piece)
+        remove(moveRecord.piece.id)
+        pieces.add(moveRecord.piece.toPiece())
         if (moveRecord.victim != null) {
-            pieces.add(moveRecord.victim)
+            pieces.add(moveRecord.victim.toPiece())
+        }
+        if (moveRecord.promotionTo != null) {
+            remove(moveRecord.promotionTo.id)
         }
         moveRecord.combinedMove?.let { undo(it) }
     }
@@ -152,15 +162,16 @@ class Board {
             }
             return false
         }
-        throw IllegalArgumentException("Positions must be on same rank, file or diagonal")
+        return true
+//        throw IllegalArgumentException("Positions must be on same rank, file or diagonal")
     }
 
     fun findKing(color: Color): Position? {
-        var kingPos: Position? = null
-        eachPosition {
-            if (this[it] is King && this[it]?.color == color) kingPos = it
-        }
-        return kingPos
+        return pieces
+                .filterIsInstance<King>()
+                .filter { it.color == color }
+                .map { it.position }
+                .firstOrNull()
     }
 
     internal fun <R> eachPosition(function: (Position) -> R): List<R> {

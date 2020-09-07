@@ -6,10 +6,9 @@ import io.github.patricsteiner.chessengine.domain.Position
 /**
  * A Piece must know it's possible moves and captures, _disregarding_ other pieces.
  */
-abstract class Piece(val color: Color, initialPosition: Position) {
+abstract class Piece(val id: String, val color: Color, initialPosition: Position, moveCount: Int) {
 
-    var moveCount = 0; private set
-
+    var moveCount = moveCount; private set
     var position = initialPosition; private set
 
     enum class Color {
@@ -17,12 +16,6 @@ abstract class Piece(val color: Color, initialPosition: Position) {
 
         fun opposite(): Color {
             return if (this == WHITE) BLACK else WHITE
-        }
-    }
-
-    companion object {
-        fun of(type: Class<out Piece>, color: Color, position: Position): Piece {
-            return type.getConstructor(Color::class.java, Position::class.java).newInstance(color, position)
         }
     }
 
@@ -68,11 +61,6 @@ abstract class Piece(val color: Color, initialPosition: Position) {
 
     open fun canJumpOverPieces(): Boolean {
         return false
-    }
-
-    fun copy(): Piece {
-        val pieceData = PieceData.from(this)
-        return of(pieceData.type, pieceData.color, pieceData.position)
     }
 
 }

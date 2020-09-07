@@ -3,9 +3,12 @@ package io.github.patricsteiner.chessengine.domain.piece
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.BLACK
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
+import java.util.*
 import kotlin.math.abs
 
-class Pawn(color: Color, initialPosition: Position) : Piece(color, initialPosition) {
+class Pawn(id: String, color: Color, initialPosition: Position, moveCount: Int) : Piece(id, color, initialPosition, moveCount) {
+
+    constructor(color: Color, initialPosition: Position) : this(UUID.randomUUID().toString(), color, initialPosition, 0)
 
     override fun toChar(): Char {
         return if (color == WHITE) 'P' else 'p'
@@ -28,7 +31,7 @@ class Pawn(color: Color, initialPosition: Position) : Piece(color, initialPositi
         if (color == WHITE) {
             return abs(deltaX) == 1 && deltaY == 1
         } else if (color == BLACK) {
-            return  abs(deltaX) == 1 && deltaY == -1
+            return abs(deltaX) == 1 && deltaY == -1
         }
         return false
     }

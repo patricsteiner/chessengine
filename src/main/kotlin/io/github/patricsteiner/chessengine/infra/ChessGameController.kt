@@ -32,6 +32,22 @@ class ChessGameController(private val gameService: GameService) {
         return ResponseEntity(newGameData, HttpStatus.OK)
     }
 
+    @ExperimentalStdlibApi
+    @PostMapping("game/{id}/undo")
+    fun undoMove(@PathVariable id: String): ResponseEntity<GameData> {
+        val newGameData = gameService.undo(id)
+        sink.next(newGameData)
+        return ResponseEntity(newGameData, HttpStatus.OK)
+    }
+
+    @ExperimentalStdlibApi
+    @PostMapping("game/{id}/redo")
+    fun redoMove(@PathVariable id: String): ResponseEntity<GameData> {
+        val newGameData = gameService.redo(id)
+        sink.next(newGameData)
+        return ResponseEntity(newGameData, HttpStatus.OK)
+    }
+
     @GetMapping("game/{id}/possibleMoves")
     fun possibleMoves(@PathVariable id: String, @RequestParam color: Color, @RequestParam x: Int, @RequestParam y: Int): List<PositionData> {
         return gameService.possibleMoves(id, color, Position(x, y))
