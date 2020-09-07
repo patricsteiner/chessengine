@@ -28,7 +28,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
 
     init {
         board.setupDefaultChessPieces()
-//        board.addAdditionalPieces()
+        board.addAdditionalPieces()
     }
 
     private fun isOver(): Boolean {
@@ -146,8 +146,9 @@ class Game(val id: String, val player1: Player, val player2: Player) {
         board.apply(moveRecord)
         moveHistory.add(moveRecord)
         val enemyColor = turn.opposite()
+        check = if (isCheck(enemyColor)) enemyColor else null
         if (!hasPossibleMoves(enemyColor)) {
-            if (isCheck(enemyColor)) {
+            if (check == enemyColor) {
                 winner = turn // checkmate
             } else {
                 draw = true // stalemate
