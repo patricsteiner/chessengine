@@ -85,34 +85,27 @@ class Board(pieces: List<Piece> = mutableListOf()) {
         return pieces.find { it.id == id } ?: throw IllegalArgumentException("No piece found with id $id")
     }
 
-    private fun remove(id: String) {
-        val removed = pieces.removeIf { it.id == id }
-        if (!removed) {
-            throw IllegalStateException("There is no piece with id $id")
-        }
-    }
-
     fun apply(moveRecord: MoveRecord) {
         val piece = get(moveRecord.piece.id)
         piece.move(moveRecord.to)
         if (moveRecord.victim != null) {
-            remove(moveRecord.victim.id)
+            pieces.removeIf { it.id == moveRecord.victim.id }
         }
         if (moveRecord.promotionTo != null) {
-            remove(moveRecord.piece.id)
+            pieces.removeIf { it.id == moveRecord.piece.id }
             pieces.add(moveRecord.promotionTo.toPiece())
         }
         moveRecord.combinedMove?.let { apply(it) }
     }
 
     fun undo(moveRecord: MoveRecord) {
-        remove(moveRecord.piece.id)
+        pieces.removeIf { it.id == moveRecord.piece.id }
         pieces.add(moveRecord.piece.toPiece())
         if (moveRecord.victim != null) {
             pieces.add(moveRecord.victim.toPiece())
         }
         if (moveRecord.promotionTo != null) {
-            remove(moveRecord.promotionTo.id)
+            pieces.removeIf { it.id == moveRecord.promotionTo.id }
         }
         moveRecord.combinedMove?.let { undo(it) }
     }
