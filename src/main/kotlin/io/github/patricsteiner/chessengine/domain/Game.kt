@@ -82,18 +82,15 @@ class Game(val id: String, val player1: Player, val player2: Player) {
 
         var combinedMove: MoveRecord? = null
         if (!pieceHasAbilityToExecute(moveRecord)) {
-            combinedMove = createCastleMoveIfPossible(piece, to) // TODO does not work properly
+            combinedMove = createCastleMoveIfPossible(piece, to)
             if (combinedMove == null) return null
         }
         if (otherPieceBlocksMove(moveRecord)) return null
         if (resultsInCheck(moveRecord)) return null
 
-        val promotionTo = getPromotionIfPossible(piece, to) // TODO does not work properly with undo
+        val promotionTo = getPromotionIfPossible(piece, to)
 
-        if (promotionTo != null) {
-            return MoveRecord(moveRecord.piece, moveRecord.to, moveRecord.victim, PieceData.from(promotionTo), combinedMove)
-        }
-        return moveRecord
+        return MoveRecord(moveRecord.piece, moveRecord.to, moveRecord.victim, promotionTo?.let { PieceData.from(it) }, combinedMove)
     }
 
     private fun getPromotionIfPossible(piece: Piece, to: Position): Piece? {
