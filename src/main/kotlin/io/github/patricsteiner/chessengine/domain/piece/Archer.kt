@@ -25,4 +25,7 @@ class Archer(id: String, color: Color, initialPosition: Position, moveCount: Int
         return abs(deltaX) == 3 && abs(deltaY) == 3
     }
 
+    override fun isMelee(): Boolean {
+        return false
+    }
 }

@@ -63,6 +63,10 @@ abstract class Piece(val id: String, val color: Color, initialPosition: Position
         return false
     }
 
+    open fun isMelee(): Boolean {
+        return true
+    }
+
 }
 
 

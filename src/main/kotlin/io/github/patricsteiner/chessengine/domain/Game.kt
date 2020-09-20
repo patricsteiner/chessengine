@@ -40,7 +40,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
         return board.pieces()
                 .filter { it.color == color.opposite() }
                 .filter { it.hasAbilityToCapture(kingPos) }
-                .any { it.canJumpOverPieces() || !board.hasPieceOnLineBetween(it.position, kingPos) } // TODO problem exception?
+                .any { it.canJumpOverPieces() || !board.hasPieceOnLineBetween(it.position, kingPos) }
     }
 
     private fun hasPossibleMoves(color: Color): Boolean {
@@ -85,7 +85,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
             combinedMove = createCastleMoveIfPossible(piece, to)
             if (combinedMove == null) return null
         }
-        if (otherPieceBlocksMove(moveRecord)) return null
+        if (otherPieceBlocks(moveRecord)) return null
         if (resultsInCheck(moveRecord)) return null
 
         val promotionTo = getPromotionIfPossible(piece, to)
@@ -160,7 +160,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
     private fun resultsInCheck(moveRecord: MoveRecord): Boolean {
         board.apply(moveRecord)
         val resultsInCheck = isCheck(moveRecord.piece.color)
-        board.undo(moveRecord) // TODO sometimes is not exec when haspieceonline throws
+        board.undo(moveRecord)
         return resultsInCheck
     }
 
@@ -174,15 +174,16 @@ class Game(val id: String, val player1: Player, val player2: Player) {
         return false
     }
 
-    private fun otherPieceBlocksMove(moveRecord: MoveRecord): Boolean {
+    private fun otherPieceBlocks(moveRecord: MoveRecord): Boolean {
         if (moveRecord.piece.toPiece().canJumpOverPieces()) return false
-        return board.hasPieceOnLineBetween(moveRecord.piece.position, moveRecord.to)
+        val targetPosition =  moveRecord.victim?.position ?: moveRecord.to
+        return board.hasPieceOnLineBetween(moveRecord.piece.position, targetPosition)
     }
 
     private fun pieceHasAbilityToExecute(moveRecord: MoveRecord): Boolean {
         val piece = moveRecord.piece.toPiece()
         val isCapturingMove = moveRecord.victim != null
-        if (isCapturingMove && piece.hasAbilityToCapture(moveRecord.to)) {
+        if (isCapturingMove && piece.hasAbilityToCapture(moveRecord.victim!!.position)) {
             return true
         } else if (!isCapturingMove && piece.hasAbilityToMove(moveRecord.to)) {
             return true

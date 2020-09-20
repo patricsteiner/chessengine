@@ -87,7 +87,9 @@ class Board(pieces: List<Piece> = mutableListOf()) {
 
     fun apply(moveRecord: MoveRecord) {
         val piece = get(moveRecord.piece.id)
-        piece.move(moveRecord.to)
+        if (piece.isMelee() || !piece.isMelee() && moveRecord.victim == null) {
+            piece.move(moveRecord.to)
+        }
         if (moveRecord.victim != null) {
             pieces.removeIf { it.id == moveRecord.victim.id }
         }
@@ -111,7 +113,7 @@ class Board(pieces: List<Piece> = mutableListOf()) {
     }
 
     /**
-     * A line is either a file, a rank or a diagonal. Throws error otherwise.
+     * A line is either a file, a rank or a diagonal. If given positions do not form a line, returns true.
      */
     fun hasPieceOnLineBetween(fromExclusive: Position, toExclusive: Position): Boolean {
         if (isOnSameFile(fromExclusive, toExclusive)) {
@@ -156,7 +158,6 @@ class Board(pieces: List<Piece> = mutableListOf()) {
             return false
         }
         return true
-//        throw IllegalArgumentException("Positions must be on same rank, file or diagonal")
     }
 
     fun findKing(color: Color): Position? {
