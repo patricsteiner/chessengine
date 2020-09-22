@@ -4,4 +4,6 @@ interface GameRepository {
 
     fun find(id: String): Game?
 
+    fun save(game: Game)
+
 }

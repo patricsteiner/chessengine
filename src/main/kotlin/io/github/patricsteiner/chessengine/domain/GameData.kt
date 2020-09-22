@@ -3,10 +3,10 @@ package io.github.patricsteiner.chessengine.domain
 import io.github.patricsteiner.chessengine.domain.piece.Piece
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color
 
-data class GameData(val id: String, val player1: Player, val player2: Player, val turn: Color, val winner: Color?, val draw: Boolean, val board: BoardData, val check: Color?) {
+data class GameData(val id: String, val turn: Color, val winner: Color?, val draw: Boolean, val board: BoardData, val check: Color?) {
     companion object {
         fun from(game: Game): GameData {
-            return GameData(game.id, game.player1, game.player2, game.turn, game.winner, game.draw, BoardData.from(game.board), game.check)
+            return GameData(game.id, game.turn, game.winner, game.draw, BoardData.from(game.board), game.check)
         }
     }
 }

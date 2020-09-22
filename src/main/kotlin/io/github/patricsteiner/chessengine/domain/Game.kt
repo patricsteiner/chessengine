@@ -9,12 +9,17 @@ import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 import io.github.patricsteiner.chessengine.domain.piece.Queen
 import java.util.UUID.randomUUID
 
-class Game(val id: String, val player1: Player, val player2: Player) {
+typealias GameId = String
+typealias ColorToken = String
+
+class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToken) {
 
     companion object {
-        fun newGame(player1: Player, player2: Player): Game {
-            val id = randomUUID().toString()
-            return Game(id, player1, player2)
+        fun newGame(): Game {
+            val id = randomUUID().toString().substringBefore("-")
+            val whiteToken = randomUUID().toString().substringBefore("-")
+            val blackToken = randomUUID().toString().substringBefore("-")
+            return Game(id, whiteToken, blackToken)
         }
     }
 
@@ -29,6 +34,12 @@ class Game(val id: String, val player1: Player, val player2: Player) {
     init {
         board.setupDefaultChessPieces()
         board.addAdditionalPieces()
+    }
+
+    fun colorFromToken(colorToken: ColorToken): Color? {
+        if (colorToken == whiteToken) return WHITE
+        if (colorToken == blackToken) return BLACK
+        return null
     }
 
     private fun isOver(): Boolean {
@@ -176,7 +187,7 @@ class Game(val id: String, val player1: Player, val player2: Player) {
 
     private fun otherPieceBlocks(moveRecord: MoveRecord): Boolean {
         if (moveRecord.piece.toPiece().canJumpOverPieces()) return false
-        val targetPosition =  moveRecord.victim?.position ?: moveRecord.to
+        val targetPosition = moveRecord.victim?.position ?: moveRecord.to
         return board.hasPieceOnLineBetween(moveRecord.piece.position, targetPosition)
     }
 
