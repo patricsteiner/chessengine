@@ -2,15 +2,29 @@ package io.github.patricsteiner.chessengine.application
 
 import io.github.patricsteiner.chessengine.domain.*
 import io.github.patricsteiner.chessengine.domain.Game.Companion.newGame
-import io.github.patricsteiner.chessengine.domain.piece.Piece.Color
+
+typealias GameDataConsumer = (GameData) -> Unit
 
 class GameService(private val gameRepository: GameRepository) {
+
+    private val onSaveListeners = mutableMapOf<GameId, MutableList<GameDataConsumer>>()
+
+    fun addListener(id: GameId, gameDataConsumer: GameDataConsumer) {
+        if (!onSaveListeners.containsKey(id)) {
+            onSaveListeners[id] = mutableListOf()
+        }
+        onSaveListeners[id]!!.add(gameDataConsumer)
+    }
+
+    fun removeListener(id: GameId, gameDataConsumer: GameDataConsumer) {
+        onSaveListeners[id]?.removeIf { it === gameDataConsumer }
+    }
 
     fun move(gameId: String, colorToken: ColorToken, from: Position, to: Position): GameData {
         val game = getGame(gameId)
         val color = game.colorFromToken(colorToken) ?: throw RuntimeException("Invalid colorToken")
         game.move(color, from, to)
-        gameRepository.save(game)
+        saveGame(game)
         return GameData.from(game)
     }
 
@@ -41,12 +55,20 @@ class GameService(private val gameRepository: GameRepository) {
 
     fun createNewGame(): GameAndTokenData {
         val game = newGame()
-        gameRepository.save(game)
+        saveGame(game)
         return GameAndTokenData(GameData.from(game), game.whiteToken, game.blackToken)
     }
 
     private fun getGame(gameId: String): Game {
         return gameRepository.find(gameId) ?: throw RuntimeException("Can't find game")
+    }
+
+    private fun saveGame(game: Game) {
+        gameRepository.save(game)
+        onSaveListeners[game.id]?.run {
+            val gameData = GameData.from(game)
+            forEach { it(gameData) }
+        }
     }
 
 }
