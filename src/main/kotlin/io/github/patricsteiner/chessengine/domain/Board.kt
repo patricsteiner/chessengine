@@ -44,13 +44,15 @@ class Board(pieces: List<Piece> = mutableListOf()) {
         }
     }
 
-    private val pieces = pieces.toMutableList()  // could use hashmap or sth instead
+    private val pieces = pieces.toMutableList()  // could use hashmap or sth instead // TODO use something to assure there is no more than 1 piece per position
 
     fun addAdditionalPieces() {
         pieces.add(Scout(WHITE, Position('a', 3)))
         pieces.add(Scout(BLACK, Position('a', 6)))
         pieces.add(Archer(WHITE, Position('h', 3)))
         pieces.add(Archer(BLACK, Position('h', 6)))
+        pieces.add(Lumberjack(WHITE, Position('b', 3)))
+        pieces.add(Lumberjack(BLACK, Position('g', 6)))
     }
 
     fun setupDefaultChessPieces() {
