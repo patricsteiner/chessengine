@@ -3,20 +3,20 @@ package io.github.patricsteiner.chessengine.domain.piece
 import io.github.patricsteiner.chessengine.domain.Board
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
-import kotlin.math.abs
+import java.lang.Error
 
-class Lumberjack(color: Color, position: Position) : Piece(color, position) {
+class Tree(color: Color, position: Position) : Piece(color, position) {
 
     override fun toChar(): Char {
-        return if (color == WHITE) 'L' else 'l'
+        return if (color == WHITE) 'T' else 't'
     }
 
     override fun toUnicodeSymbol(): String {
-        return if (color == WHITE) "L" else "l"
+        return if (color == WHITE) "T" else "t"
     }
 
     override fun canMove(to: Position, board: Board, deltaX: Int, deltaY: Int): Boolean {
-        return abs(deltaX) <= 1 && abs(deltaY) <= 1 && abs(deltaX) + abs(deltaY) <= 2
+        return false
     }
 
     override fun canAttack(to: Position, board: Board, deltaX: Int, deltaY: Int): Boolean {
@@ -24,18 +24,11 @@ class Lumberjack(color: Color, position: Position) : Piece(color, position) {
     }
 
     override fun move(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult {
-        val prevPosition = position
-        position = to
-        board.addPiece(Tree(color, prevPosition))
-        val undoFunction = {
-            board.removePiece(prevPosition)
-            position = prevPosition
-        }
-        return MoveResult.Success(undoFunction)
+        return MoveResult.Error("A Tree cannot move")
     }
 
     override fun attack(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult {
-        return MoveResult.Error("Lumberjack cannot attack")
+        return MoveResult.Error("A Tree cannot attack")
     }
 
 }

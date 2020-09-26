@@ -71,12 +71,12 @@ class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToke
         if (isOver()) {
             throw RuntimeException("Game is over")
         }
-//        if (color != turn) {
-//            throw RuntimeException("It's not $color's turn")
-//        }
-//        if (board[from]?.color != color) {
-//            throw RuntimeException("Cannot move enemy pieces")
-//        }
+        if (color != turn) {
+            throw RuntimeException("It's not $color's turn")
+        }
+        if (board[from]?.color != color) {
+            throw RuntimeException("Cannot move enemy pieces")
+        }
         if (board[from] == null) {
             throw RuntimeException("There is no piece on $from")
         }

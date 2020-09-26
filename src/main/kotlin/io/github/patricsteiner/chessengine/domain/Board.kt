@@ -57,6 +57,8 @@ class Board {
         pieces.add(Scout(BLACK, Position('a', 6)))
         pieces.add(Archer(WHITE, Position('h', 3)))
         pieces.add(Archer(BLACK, Position('h', 6)))
+        pieces.add(Lumberjack(WHITE, Position('g', 3)))
+        pieces.add(Lumberjack(BLACK, Position('g', 6)))
     }
 
     fun setupDefaultChessPieces() {
