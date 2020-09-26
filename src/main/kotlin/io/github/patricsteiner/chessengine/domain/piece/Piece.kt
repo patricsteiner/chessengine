@@ -1,15 +1,14 @@
 package io.github.patricsteiner.chessengine.domain.piece
 
-import io.github.patricsteiner.chessengine.domain.PieceData
+import io.github.patricsteiner.chessengine.domain.Board
 import io.github.patricsteiner.chessengine.domain.Position
 
-/**
- * A Piece must know it's possible moves and captures, _disregarding_ other pieces.
- */
-abstract class Piece(val id: String, val color: Color, initialPosition: Position, moveCount: Int) {
+sealed class MoveResult {
+    class Success(val undoFunction: () -> Unit) : MoveResult()
+    class Error(val message: String? = null) : MoveResult()
+}
 
-    var moveCount = moveCount; private set
-    var position = initialPosition; private set
+abstract class Piece(val color: Color, var position: Position, var moves: Int = 0, var attacks: Int = 0) {
 
     enum class Color {
         BLACK, WHITE;
@@ -17,11 +16,6 @@ abstract class Piece(val id: String, val color: Color, initialPosition: Position
         fun opposite(): Color {
             return if (this == WHITE) BLACK else WHITE
         }
-    }
-
-    fun move(to: Position) {
-        position = to
-        moveCount++
     }
 
     override fun toString(): String {
@@ -32,41 +26,44 @@ abstract class Piece(val id: String, val color: Color, initialPosition: Position
 
     abstract fun toUnicodeSymbol(): String
 
-    /**
-     * Checks whether the piece has the ability to move from its current position to the given position,
-     * disregarding any other pieces or rules on the board.
-     */
-    fun hasAbilityToMove(to: Position): Boolean {
+    protected abstract fun canMove(to: Position, board: Board, deltaX: Int, deltaY: Int): Boolean
+
+    protected abstract fun canAttack(to: Position, board: Board, deltaX: Int, deltaY: Int): Boolean
+
+    fun canMove(to: Position, board: Board): Boolean {
         val deltaX = position.x - to.x
         val deltaY = position.y - to.y
-        if (deltaX == 0 && deltaY == 0) return false // cannot stay on same position
-        return hasAbilityToMove(to, deltaX, deltaY)
+        return canMove(to, board, deltaX, deltaY)
     }
 
-    protected abstract fun hasAbilityToMove(to: Position, deltaX: Int, deltaY: Int): Boolean
-
-    /**
-     * Checks whether the piece has the ability to capture a piece at the given position,
-     * disregarding any other pieces or rules on the board.
-     */
-    fun hasAbilityToCapture(position: Position): Boolean {
-        val deltaX = this.position.x - position.x
-        val deltaY = this.position.y - position.y
-        return hasAbilityToCapture(position, deltaX, deltaY)
+    fun canAttack(to: Position, board: Board): Boolean {
+        val deltaX = position.x - to.x
+        val deltaY = position.y - to.y
+        return canAttack(to, board, deltaX, deltaY)
     }
 
-    protected open fun hasAbilityToCapture(position: Position, deltaX: Int, deltaY: Int): Boolean {
-        return hasAbilityToMove(position, deltaX, deltaY)
+    fun moveOrAttack(to: Position, board: Board): MoveResult {
+        val deltaX = position.x - to.x
+        val deltaY = position.y - to.y
+        if (board[to] != null) {
+            if (board[to]?.color == color) return MoveResult.Error("Cannot friendly fire")
+            if (!canAttack(to, board, deltaX, deltaY)) return MoveResult.Error("Cannot attack $to")
+            return attack(to, board, deltaX, deltaY)
+        } else {
+            if (position == to) return MoveResult.Error("Cannot stay on same position")
+            if (!canMove(to, board, deltaX, deltaY)) return MoveResult.Error("Cannot move to $to")
+            return move(to, board, deltaX, deltaY)
+        }
     }
 
-    open fun canJumpOverPieces(): Boolean {
-        return false
-    }
+    protected abstract fun move(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult
 
-    open fun isMelee(): Boolean {
-        return true
+    protected abstract fun attack(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult
+
+    fun possibleMovesOrAttacks(board: Board): List<Position> {
+        return board.eachPosition {
+            return@eachPosition if (canMove(it, board) || canAttack(it, board)) it else null
+        }.filterNotNull()
     }
 
 }
-
-

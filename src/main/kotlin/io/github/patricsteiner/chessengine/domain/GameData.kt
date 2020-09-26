@@ -24,22 +24,17 @@ data class BoardData(val ranks: Int, val pieces: List<PieceData>, val asMatrix: 
 }
 
 data class PieceData(
-        val id: String,
         val type: Class<out Piece>,
         val char: Char,
         val color: Color,
         val unicodeSymbol: String,
-        val position: Position,
-        val moveCount: Int
+        val position: Position
 ) {
     companion object {
         fun from(piece: Piece): PieceData {
-            return PieceData(piece.id, piece::class.java, piece.toChar(), piece.color, piece.toUnicodeSymbol(), piece.position, piece.moveCount)
+            return PieceData(piece::class.java, piece.toChar(), piece.color, piece.toUnicodeSymbol(), piece.position)
         }
     }
 
-    fun toPiece(): Piece {
-        return type.getConstructor(String::class.java, Color::class.java, Position::class.java, Int::class.java).newInstance(id, color, position, moveCount)
-    }
 }
 

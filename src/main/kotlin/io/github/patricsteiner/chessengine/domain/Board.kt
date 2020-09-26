@@ -8,10 +8,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * The Chessbaord can just apply or undo a MoveRecord, but it is not responsible for checking any rules. This is done in the Game class.
- */
-class Board(pieces: List<Piece> = mutableListOf()) {
+class Board {
 
     companion object {
         const val N_RANKS = 8
@@ -44,22 +41,29 @@ class Board(pieces: List<Piece> = mutableListOf()) {
         }
     }
 
-    private val pieces = pieces.toMutableList()  // could use hashmap or sth instead // TODO use something to assure there is no more than 1 piece per position
+    private val pieces = mutableListOf<Piece>()
+
+    fun addPiece(piece: Piece) {
+        if (pieces.any { it.position == piece.position }) throw RuntimeException("Cannot have 2 pieces at same position")
+        pieces.add(piece)
+    }
+
+    fun removePiece(position: Position) {
+        pieces.removeIf { it.position == position }
+    }
 
     fun addAdditionalPieces() {
         pieces.add(Scout(WHITE, Position('a', 3)))
         pieces.add(Scout(BLACK, Position('a', 6)))
         pieces.add(Archer(WHITE, Position('h', 3)))
         pieces.add(Archer(BLACK, Position('h', 6)))
-        pieces.add(Lumberjack(WHITE, Position('b', 3)))
-        pieces.add(Lumberjack(BLACK, Position('g', 6)))
     }
 
     fun setupDefaultChessPieces() {
         pieces.clear()
         for (i in 0 until N_RANKS) {
-            pieces.add(Pawn(WHITE, Position('a' + i, 2)))
-            pieces.add(Pawn(BLACK, Position('a' + i, 7)))
+            addPiece(Pawn(WHITE, Position('a' + i, 2)))
+            addPiece(Pawn(BLACK, Position('a' + i, 7)))
         }
         pieces.add(Rook(WHITE, Position('a', 1)))
         pieces.add(Rook(WHITE, Position('h', 1)))
@@ -75,43 +79,12 @@ class Board(pieces: List<Piece> = mutableListOf()) {
         pieces.add(Bishop(BLACK, Position('f', 8)))
         pieces.add(Queen(WHITE, Position('d', 1)))
         pieces.add(Queen(BLACK, Position('d', 8)))
-        pieces.add(King(WHITE, Position('e', 1)))
-        pieces.add(King(BLACK, Position('e', 8)))
+        addPiece(King(WHITE, Position('e', 1)))
+        addPiece(King(BLACK, Position('e', 8)))
     }
 
     operator fun get(position: Position): Piece? {
         return pieces.find { it.position == position }
-    }
-
-    private fun get(id: String): Piece {
-        return pieces.find { it.id == id } ?: throw IllegalArgumentException("No piece found with id $id")
-    }
-
-    fun apply(moveRecord: MoveRecord) {
-        val piece = get(moveRecord.piece.id)
-        if (piece.isMelee() || !piece.isMelee() && moveRecord.victim == null) {
-            piece.move(moveRecord.to)
-        }
-        if (moveRecord.victim != null) {
-            pieces.removeIf { it.id == moveRecord.victim.id }
-        }
-        if (moveRecord.promotionTo != null) {
-            pieces.removeIf { it.id == moveRecord.piece.id }
-            pieces.add(moveRecord.promotionTo.toPiece())
-        }
-        moveRecord.combinedMove?.let { apply(it) }
-    }
-
-    fun undo(moveRecord: MoveRecord) {
-        pieces.removeIf { it.id == moveRecord.piece.id }
-        pieces.add(moveRecord.piece.toPiece())
-        if (moveRecord.victim != null) {
-            pieces.add(moveRecord.victim.toPiece())
-        }
-        if (moveRecord.promotionTo != null) {
-            pieces.removeIf { it.id == moveRecord.promotionTo.id }
-        }
-        moveRecord.combinedMove?.let { undo(it) }
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.github.patricsteiner.chessengine.infra
 
 import io.github.patricsteiner.chessengine.application.GameAndTokenData
+import io.github.patricsteiner.chessengine.application.GameDataConsumer
 import io.github.patricsteiner.chessengine.application.GameService
 import io.github.patricsteiner.chessengine.domain.ColorToken
 import io.github.patricsteiner.chessengine.domain.GameData
@@ -39,23 +40,9 @@ class ChessGameController(private val gameService: GameService) {
         return ResponseEntity(newGameData, HttpStatus.OK)
     }
 
-    @ExperimentalStdlibApi
-    @PostMapping("game/{id}/undo")
-    fun undoMove(@PathVariable id: GameId): ResponseEntity<GameData> {
-        val newGameData = gameService.undo(id)
-        return ResponseEntity(newGameData, HttpStatus.OK)
-    }
-
-    @ExperimentalStdlibApi
-    @PostMapping("game/{id}/redo")
-    fun redoMove(@PathVariable id: GameId): ResponseEntity<GameData> {
-        val newGameData = gameService.redo(id)
-        return ResponseEntity(newGameData, HttpStatus.OK)
-    }
-
     @GetMapping("game/{id}/possibleMoves")
-    fun possibleMoves(@PathVariable id: GameId, @RequestParam colorToken: ColorToken, @RequestParam x: Int, @RequestParam y: Int): List<PositionData> {
-        return gameService.possibleMoves(id, colorToken, Position(x, y))
+    fun possibleMoves(@PathVariable id: GameId, @RequestParam x: Int, @RequestParam y: Int): List<PositionData> {
+        return gameService.possibleMoves(id, Position(x, y))
                 .map { PositionData(it.x, it.y) }
     }
 
