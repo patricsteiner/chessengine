@@ -46,7 +46,7 @@ abstract class Piece(val color: Color, var position: Position, var moves: Int = 
         val deltaX = position.x - to.x
         val deltaY = position.y - to.y
         if (board[to] != null) {
-            if (board[to]?.color == color) return MoveResult.Error("Cannot friendly fire")
+            if (board[to]?.color == color && board[to] !is Tree) return MoveResult.Error("Cannot friendly fire")
             if (!canAttack(to, board, deltaX, deltaY)) return MoveResult.Error("Cannot attack $to")
             return attack(to, board, deltaX, deltaY)
         } else {

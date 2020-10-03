@@ -5,7 +5,7 @@ import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 import kotlin.math.abs
 
-class Lumberjack(color: Color, position: Position) : Piece(color, position) {
+class Lumberjack(color: Color, position: Position) : BasicPiece(color, position) {
 
     override fun toChar(): Char {
         return if (color == WHITE) 'L' else 'l'
@@ -20,7 +20,7 @@ class Lumberjack(color: Color, position: Position) : Piece(color, position) {
     }
 
     override fun canAttack(to: Position, board: Board, deltaX: Int, deltaY: Int): Boolean {
-        return false
+        return board[to] is Tree
     }
 
     override fun move(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult {
@@ -34,8 +34,5 @@ class Lumberjack(color: Color, position: Position) : Piece(color, position) {
         return MoveResult.Success(undoFunction)
     }
 
-    override fun attack(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult {
-        return MoveResult.Error("Lumberjack cannot attack")
-    }
 
 }
