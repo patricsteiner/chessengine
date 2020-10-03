@@ -22,7 +22,7 @@ class GameService(private val gameRepository: GameRepository) {
 
     fun move(gameId: String, colorToken: ColorToken, from: Position, to: Position): GameData {
         val game = getGame(gameId)
-        val color = game.colorFromToken(colorToken) ?: throw RuntimeException("Invalid colorToken")
+        val color = if (!game.requireColorTokens) game.turn else game.colorFromToken(colorToken) ?: throw RuntimeException("Invalid colorToken")
         game.moveOrAttack(color, from, to)
         saveGame(game)
         return GameData.from(game)
@@ -38,13 +38,13 @@ class GameService(private val gameRepository: GameRepository) {
         return GameData.from(game)
     }
 
-    fun createNewGame(): GameAndTokenData {
-        val game = newGame()
+    fun createNewGame(requireColorTokens: Boolean): GameAndTokenData {
+        val game = newGame(requireColorTokens)
         saveGame(game)
         return GameAndTokenData(GameData.from(game), game.whiteToken, game.blackToken)
     }
 
-    private fun getGame(gameId: String): Game {
+    private fun getGame(gameId: GameId): Game {
         return gameRepository.find(gameId) ?: throw RuntimeException("Can't find game")
     }
 

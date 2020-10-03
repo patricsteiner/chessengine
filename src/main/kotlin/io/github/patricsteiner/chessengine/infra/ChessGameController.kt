@@ -29,8 +29,8 @@ class ChessGameController(private val gameService: GameService) {
     }
 
     @PostMapping("game")
-    fun createNewGame(): ResponseEntity<GameAndTokenData> {
-        val gameAndTokenData = gameService.createNewGame()
+    fun createNewGame(@RequestBody newGameData: NewGameData): ResponseEntity<GameAndTokenData> {
+        val gameAndTokenData = gameService.createNewGame(newGameData.requireColorTokens)
         return ResponseEntity(gameAndTokenData, HttpStatus.OK)
     }
 
@@ -48,5 +48,8 @@ class ChessGameController(private val gameService: GameService) {
 
 }
 
+
+data class NewGameData(val requireColorTokens: Boolean)
 data class MoveData(val from: PositionData, val to: PositionData)
 data class PositionData(val x: Int, val y: Int)
+

@@ -52,6 +52,45 @@ class Board {
         pieces.removeIf { it.position == position }
     }
 
+    fun setupPieces() {
+        // frontline
+        addPiece(Scout(WHITE, Position('a', 2)))
+        addPiece(Lumberjack(WHITE, Position('b', 2)))
+        addPiece(Pawn(WHITE, Position('c', 2)))
+        addPiece(Pawn(WHITE, Position('d', 2)))
+        addPiece(Pawn(WHITE, Position('e', 2)))
+        addPiece(Pawn(WHITE, Position('f', 2)))
+        addPiece(Pawn(WHITE, Position('g', 2)))
+        addPiece(Archer(WHITE, Position('h', 2)))
+
+        addPiece(Scout(BLACK, Position('a', 7)))
+        addPiece(Lumberjack(BLACK, Position('b', 7)))
+        addPiece(Pawn(BLACK, Position('c', 7)))
+        addPiece(Pawn(BLACK, Position('d', 7)))
+        addPiece(Pawn(BLACK, Position('e', 7)))
+        addPiece(Pawn(BLACK, Position('f', 7)))
+        addPiece(Pawn(BLACK, Position('g', 7)))
+        addPiece(Archer(BLACK, Position('h', 7)))
+
+        // backline
+        addPiece(Rook(WHITE, Position('a', 1)))
+        addPiece(Rook(WHITE, Position('h', 1)))
+        addPiece(Rook(BLACK, Position('a', 8)))
+        addPiece(Rook(BLACK, Position('h', 8)))
+        addPiece(Knight(WHITE, Position('b', 1)))
+        addPiece(Knight(WHITE, Position('g', 1)))
+        addPiece(Knight(BLACK, Position('b', 8)))
+        addPiece(Knight(BLACK, Position('g', 8)))
+        addPiece(Bishop(WHITE, Position('c', 1)))
+        addPiece(Bishop(WHITE, Position('f', 1)))
+        addPiece(Bishop(BLACK, Position('c', 8)))
+        addPiece(Bishop(BLACK, Position('f', 8)))
+        addPiece(Queen(WHITE, Position('d', 1)))
+        addPiece(Queen(BLACK, Position('d', 8)))
+        addPiece(King(WHITE, Position('e', 1)))
+        addPiece(King(BLACK, Position('e', 8)))
+    }
+
     fun addAdditionalPieces() {
         addPiece(Scout(WHITE, Position('a', 3)))
         addPiece(Scout(BLACK, Position('a', 6)))

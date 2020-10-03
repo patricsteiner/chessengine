@@ -26,7 +26,7 @@ class King(color: Color, position: Position) : Piece(color, position) {
     }
 
     override fun move(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult {
-        val (castlePiece, castlePieceNewPosition) = getCastlePartner(to, board)
+        val (castlePiece, castlePieceNewPosition) = getCastlePartner(to, board) // TODO should also check if king.moves == 0 (but actually kind of funny to also allow castle after moving :))
         return if (castlePiece != null && castlePieceNewPosition != null) {
             val prevPosition = position
             val castlePiecePrevPosition = castlePiece.position

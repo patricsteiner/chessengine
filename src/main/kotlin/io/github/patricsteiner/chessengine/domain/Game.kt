@@ -9,14 +9,14 @@ import java.util.UUID.randomUUID
 typealias GameId = String
 typealias ColorToken = String
 
-class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToken) {
+class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToken, val requireColorTokens: Boolean) {
 
     companion object {
-        fun newGame(): Game {
-            val id = randomUUID().toString().substringBefore("-")
-            val whiteToken = randomUUID().toString().substringBefore("-")
-            val blackToken = randomUUID().toString().substringBefore("-")
-            return Game(id, whiteToken, blackToken)
+        fun newGame(requireColorTokens: Boolean): Game {
+            val id = randomUUID().toString().substring(0, 3)
+            val whiteToken = randomUUID().toString().substring(0, 3)
+            val blackToken = randomUUID().toString().substring(0, 3)
+            return Game(id, whiteToken, blackToken, requireColorTokens)
         }
     }
 
@@ -27,8 +27,7 @@ class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToke
     var draw: Boolean = false; private set
 
     init {
-        board.setupDefaultChessPieces()
-        board.addAdditionalPieces()
+        board.setupPieces()
     }
 
     fun colorFromToken(colorToken: ColorToken): Color? {
