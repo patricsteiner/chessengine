@@ -1,6 +1,7 @@
 package io.github.patricsteiner.chessengine.domain.piece
 
 import io.github.patricsteiner.chessengine.domain.Board
+import io.github.patricsteiner.chessengine.domain.GameException
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.BLACK
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
@@ -51,7 +52,7 @@ class Pawn(color: Piece.Color, position: Position) : Piece(color, position) {
     }
 
     override fun attack(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult {
-        val victim = board[to] ?: throw RuntimeException("There is no victim on $to")
+        val victim = board[to] ?: throw GameException("There is no victim on $to")
         if (color == WHITE && to.rank == 8 || color == BLACK && to.rank == 1) {
             board.removePiece(position)
             board.removePiece(to)

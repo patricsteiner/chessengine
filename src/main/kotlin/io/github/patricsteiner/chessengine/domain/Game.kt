@@ -68,23 +68,26 @@ class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToke
 
     fun moveOrAttack(color: Color, from: Position, to: Position) {
         if (isOver()) {
-            throw RuntimeException("Game is over")
+            throw GameException("Game is over")
         }
         if (color != turn) {
-            throw RuntimeException("It's not $color's turn")
-        }
-        if (board[from]?.color != color) {
-            throw RuntimeException("Cannot move enemy pieces")
+            throw GameException("It's not $color's turn")
         }
         if (board[from] == null) {
-            throw RuntimeException("There is no piece on $from")
+            throw GameException("No piece to move")
+        }
+        if (board[from]?.color != color) {
+            throw GameException("Cannot move enemy pieces")
+        }
+        if (board[from] == null) {
+            throw GameException("There is no piece on $from")
         }
         val moveResult = board[from]!!.moveOrAttack(to, board)
         if (moveResult is MoveResult.Error) {
-            throw RuntimeException(moveResult.message)
+            throw GameException(moveResult.message)
         } else if (moveResult is MoveResult.Success && isCheck(color)) {
             moveResult.undoFunction()
-            throw RuntimeException("Cannot move into check")
+            throw GameException("Cannot move into check")
         }
         val enemyColor = turn.opposite()
         check = if (isCheck(enemyColor)) enemyColor else null

@@ -1,6 +1,7 @@
 package io.github.patricsteiner.chessengine.domain.piece
 
 import io.github.patricsteiner.chessengine.domain.Board
+import io.github.patricsteiner.chessengine.domain.GameException
 import io.github.patricsteiner.chessengine.domain.Position
 import io.github.patricsteiner.chessengine.domain.piece.Piece.Color.WHITE
 import kotlin.math.abs
@@ -46,7 +47,7 @@ class King(color: Color, position: Position) : Piece(color, position) {
     }
 
     override fun attack(to: Position, board: Board, deltaX: Int, deltaY: Int): MoveResult {
-        val victim = board[to] ?: throw RuntimeException("There is no victim on $to")
+        val victim = board[to] ?: throw GameException("There is no victim on $to")
         val prevPosition = position
         board.removePiece(to)
         position = to
