@@ -25,6 +25,7 @@ class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToke
     var winner: Color? = null; private set
     var check: Color? = null; private set
     var draw: Boolean = false; private set
+    var latestMoveOrAttack: MoveData? = null; private set
 
     init {
         board.setupPieces()
@@ -89,6 +90,9 @@ class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToke
             moveResult.undoFunction()
             throw GameException("Cannot move into check")
         }
+
+        // move successful! update game data:
+        latestMoveOrAttack = MoveData(from, to)
         val enemyColor = turn.opposite()
         check = if (isCheck(enemyColor)) enemyColor else null
         if (!hasLegalMoves(enemyColor)) {
@@ -102,3 +106,6 @@ class Game(val id: GameId, val whiteToken: ColorToken, val blackToken: ColorToke
     }
 
 }
+
+data class MoveData(val from: Position, val to: Position)
+
